@@ -21,7 +21,11 @@
 - ollama/wsl = PowerShell; from Ubuntu use .exe.
 
 ## Phase 1 — baseline numbers
-(bench.py results table goes here)q!
+Qwen3:14b,CTX=16834
 
-
-
+qwen3:14b      ctx~  300 run0  in=  338 out=   8  prefill=    920 tok/s  decode=  35.7 tok/s  ttft= 14.0s  total= 14.2s
+qwen3:14b      ctx~  300 run1  in=  338 out=   8  prefill=   2311 tok/s  decode=  51.0 tok/s  ttft=  0.1s  total=  0.3s
+qwen3:14b      ctx~ 4000 run0  in= 4112 out=   8  prefill=   2352 tok/s  decode=  46.3 tok/s  ttft=  1.8s  total=  2.0s
+qwen3:14b      ctx~ 4000 run1  in= 4112 out=   8  prefill=   2434 tok/s  decode=  47.6 tok/s  ttft=  1.7s  total=  2.0s
+qwen3:14b      ctx~ 8000 run0  in= 8192 out=   8  prefill=   2124 tok/s  decode=  44.5 tok/s  ttft=  3.9s  total=  4.2s
+qwen3:14b      ctx~ 8000 run1  in= 8192 out=   8  prefill=   3835 tok/s  decode=  45.2 tok/s  ttft=  2.1s  total=  2.6s
