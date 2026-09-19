@@ -24,11 +24,25 @@ MAX_CHARS = 4000        # cap on any single tool result (keeps context growth pr
 # ---------------------------------------------------------------------------
 # tool 1: search_notes
 # ---------------------------------------------------------------------------
-def search_notes(query: str) -> str:
-    """Case-insensitive search over every .md/.txt in NOTES_DIR. Returns matching lines with file paths."""
-    if not query or not query.strip():
-        return "ERROR: empty query."
-    pattern = re.compile(re.escape(query.strip()), re.IGNORECASE)
+_STOPWORDS = {"the", "a", "an", "and", "or", "of", "to", "in", "on", "for", "my", "i", "did", "what",
+              "about", "their", "is", "are", "was", "were", "do", "does", "with", "at", "by", "from"}
+
+
+def _terms(query: str) -> list[str]:
+    """Split a query into search terms, dropping stopwords and trailing plurals ('VLANs' -> 'vlan')."""
+    words = re.findall(r"[a-z0-9][a-z0-9\-\.]*", query.lower())
+    terms = []
+    for w in words:
+        if w in _STOPWORDS or len(w) < 2:
+            continue
+        if len(w) > 3 and w.endswith("s"):
+            w = w[:-1]
+        terms.append(w)
+    return terms or [query.strip().lower()]
+
+
+def _scan(terms: list[str], mode: str) -> list[str]:
+    """mode='all': a line must contain every term. mode='any': at least one term."""
     hits = []
     for path in sorted(NOTES_DIR.rglob("*")):
         if path.suffix.lower() not in (".md", ".txt"):
@@ -39,7 +53,9 @@ def search_notes(query: str) -> str:
             continue
         per_file = 0
         for n, line in enumerate(lines, 1):
-            if pattern.search(line):
+            low = line.lower()
+            ok = all(t in low for t in terms) if mode == "all" else any(t in low for t in terms)
+            if ok:
                 snippet = line.strip()
                 if len(snippet) > 160:
                     snippet = snippet[:157] + "..."
@@ -49,9 +65,22 @@ def search_notes(query: str) -> str:
                     break
         if len(hits) >= MAX_HITS:
             break
+    return hits
+
+
+def search_notes(query: str) -> str:
+    """Keyword search over every .md/.txt in NOTES_DIR, case-insensitive, word order ignored.
+    First requires every term on the same line; if nothing matches, falls back to any term."""
+    if not query or not query.strip():
+        return "ERROR: empty query."
+    terms = _terms(query)
+    hits, mode = _scan(terms, "all"), "all terms"
+    if not hits and len(terms) > 1:
+        hits, mode = _scan(terms, "any"), "any term"
     if not hits:
-        return f"No notes matched '{query}'."
-    header = f"{len(hits)} match(es) for '{query}'" + (" (capped)" if len(hits) >= MAX_HITS else "") + ":\n"
+        return f"No notes matched {terms}. Try a different single keyword."
+    header = (f"{len(hits)} match(es) for {terms} ({mode})"
+              + (" (capped)" if len(hits) >= MAX_HITS else "") + ":\n")
     return header + "\n".join(hits)
 
 
