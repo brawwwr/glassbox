@@ -66,6 +66,7 @@ def run_agent(question, model="qwen3:14b", max_steps=8, ctx=8192, max_out=600, q
 
     messages = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": question}]
     tokens_in = tokens_out = 0
+    tools_used = []
     t_start = time.time()
     trace(kind="start", model=model, question=question, max_steps=max_steps, ctx=ctx)
 
@@ -86,15 +87,17 @@ def run_agent(question, model="qwen3:14b", max_steps=8, ctx=8192, max_out=600, q
 
         if not calls:                                  # no tool requested: this is the answer
             answer = (msg.content or "").strip()
-            trace(kind="end", steps=step, tokens_in=tokens_in, tokens_out=tokens_out,
-                  seconds=round(time.time() - t_start, 2), answer=answer[:1000])
+            seconds = round(time.time() - t_start, 2)
+            trace(kind="end", steps=step, tokens_in=tokens_in, tokens_out=tokens_out, seconds=seconds, answer=answer[:1000])
             say(f"\n{answer}\n")
-            say(f"done in {step} step(s), {time.time() - t_start:.1f}s, {tokens_in + tokens_out} tokens  -> {trace_path}")
-            return answer
+            say(f"done in {step} step(s), {seconds:.1f}s, {tokens_in + tokens_out} tokens  -> {trace_path}")
+            return {"answer": answer, "steps": step, "tokens_in": tokens_in, "tokens_out": tokens_out,
+                    "seconds": seconds, "tools_used": tools_used, "trace": str(trace_path), "error": None}
 
         messages.append(msg)                           # keep the assistant turn (with its tool_calls) in history
         for call in calls:
             name, args = call.function.name, call.function.arguments or {}
+            tools_used.append(name)
             t1 = time.time()
             result = run_tool(name, args)
             trace(kind="tool", step=step, name=name, args=args, seconds=round(time.time() - t1, 3),
@@ -102,10 +105,12 @@ def run_agent(question, model="qwen3:14b", max_steps=8, ctx=8192, max_out=600, q
             say(f"         tool {name}({json.dumps(args)[:80]}) -> {len(result)} chars")
             messages.append({"role": "tool", "content": result, "tool_name": name})
 
-    trace(kind="end", steps=max_steps, tokens_in=tokens_in, tokens_out=tokens_out,
-          seconds=round(time.time() - t_start, 2), answer=None, error="max_steps reached")
+    seconds = round(time.time() - t_start, 2)
+    trace(kind="end", steps=max_steps, tokens_in=tokens_in, tokens_out=tokens_out, seconds=seconds,
+          answer=None, error="max_steps reached")
     say(f"\nSTOPPED: hit max_steps={max_steps} without a final answer. {tokens_in + tokens_out} tokens.  -> {trace_path}")
-    return None
+    return {"answer": None, "steps": max_steps, "tokens_in": tokens_in, "tokens_out": tokens_out,
+            "seconds": seconds, "tools_used": tools_used, "trace": str(trace_path), "error": "max_steps reached"}
 
 
 if __name__ == "__main__":
@@ -116,5 +121,5 @@ if __name__ == "__main__":
     ap.add_argument("--ctx", type=int, default=8192)
     ap.add_argument("--max-out", type=int, default=600)
     a = ap.parse_args()
-    ok = run_agent(" ".join(a.question), model=a.model, max_steps=a.max_steps, ctx=a.ctx, max_out=a.max_out)
-    sys.exit(0 if ok is not None else 1)
+    result = run_agent(" ".join(a.question), model=a.model, max_steps=a.max_steps, ctx=a.ctx, max_out=a.max_out)
+    sys.exit(0 if result["answer"] is not None else 1)
