@@ -25,7 +25,9 @@ MAX_CHARS = 4000        # cap on any single tool result (keeps context growth pr
 # tool 1: search_notes
 # ---------------------------------------------------------------------------
 _STOPWORDS = {"the", "a", "an", "and", "or", "of", "to", "in", "on", "for", "my", "i", "did", "what",
-              "about", "their", "is", "are", "was", "were", "do", "does", "with", "at", "by", "from"}
+              "about", "their", "is", "are", "was", "were", "do", "does", "with", "at", "by", "from",
+              "me", "you", "your", "it", "this", "that", "when", "how", "which", "where", "who", "say",
+              "said", "wrote", "write", "note", "notes", "between", "into", "have", "has", "had"}
 
 
 def _terms(query: str) -> list[str]:
@@ -41,9 +43,10 @@ def _terms(query: str) -> list[str]:
     return terms or [query.strip().lower()]
 
 
-def _scan(terms: list[str], mode: str) -> list[str]:
-    """mode='all': a line must contain every term. mode='any': at least one term."""
-    hits = []
+def _score_lines(terms: list[str]):
+    """Yield (score, path, lineno, text) for every line containing at least one term.
+    score = number of distinct terms present. Terms match at word starts, so 'ups' does not match 'backups'."""
+    pats = [re.compile(r"(?<![a-z0-9])" + re.escape(t)) for t in terms]
     for path in sorted(NOTES_DIR.rglob("*")):
         if path.suffix.lower() not in (".md", ".txt"):
             continue
@@ -51,36 +54,38 @@ def _scan(terms: list[str], mode: str) -> list[str]:
             lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
         except OSError:
             continue
-        per_file = 0
         for n, line in enumerate(lines, 1):
             low = line.lower()
-            ok = all(t in low for t in terms) if mode == "all" else any(t in low for t in terms)
-            if ok:
-                snippet = line.strip()
-                if len(snippet) > 160:
-                    snippet = snippet[:157] + "..."
-                hits.append(f"{path.relative_to(NOTES_DIR)}:{n}: {snippet}")
-                per_file += 1
-                if len(hits) >= MAX_HITS or per_file >= MAX_PER_FILE:
-                    break
-        if len(hits) >= MAX_HITS:
-            break
-    return hits
+            score = sum(1 for p in pats if p.search(low))
+            if score:
+                yield score, path, n, line
 
 
 def search_notes(query: str) -> str:
-    """Keyword search over every .md/.txt in NOTES_DIR, case-insensitive, word order ignored.
-    First requires every term on the same line; if nothing matches, falls back to any term."""
+    """Keyword search over every .md/.txt in NOTES_DIR. Case-insensitive, word order ignored.
+    Lines are ranked by how many of the query terms they contain; the best MAX_HITS are returned,
+    at most MAX_PER_FILE per file, so the right note surfaces even when common words are in the query."""
     if not query or not query.strip():
         return "ERROR: empty query."
     terms = _terms(query)
-    hits, mode = _scan(terms, "all"), "all terms"
-    if not hits and len(terms) > 1:
-        hits, mode = _scan(terms, "any"), "any term"
+    scored = sorted(_score_lines(terms), key=lambda x: (-x[0], str(x[1]), x[2]))
+    hits, per_file = [], {}
+    for score, path, n, line in scored:
+        rel = str(path.relative_to(NOTES_DIR))
+        if per_file.get(rel, 0) >= MAX_PER_FILE:
+            continue
+        per_file[rel] = per_file.get(rel, 0) + 1
+        snippet = line.strip()
+        if len(snippet) > 160:
+            snippet = snippet[:157] + "..."
+        hits.append(f"[{score}/{len(terms)}] {rel}:{n}: {snippet}")
+        if len(hits) >= MAX_HITS:
+            break
     if not hits:
         return f"No notes matched {terms}. Try a different single keyword."
-    header = (f"{len(hits)} match(es) for {terms} ({mode})"
-              + (" (capped)" if len(hits) >= MAX_HITS else "") + ":\n")
+    total = len(scored)
+    header = (f"Top {len(hits)} of {total} matching line(s) for {terms}, ranked by terms matched "
+              f"[matched/total]:\n")
     return header + "\n".join(hits)
 
 
@@ -132,8 +137,8 @@ TOOLS = [
         "function": {
             "name": "search_notes",
             "description": (
-                "Search the user's personal markdown notes by keyword (case-insensitive). "
-                "Returns up to 10 matching lines as 'path:line: text'. "
+                "Search the user's personal markdown notes by keyword (case-insensitive, word order ignored). "
+                "Returns the 10 best-matching lines as '[terms matched/total] path:line: text', best first. "
                 "Use this FIRST whenever the question is about what the user wrote, did, decided, bought, "
                 "measured or planned. Try a short distinctive keyword; if nothing matches, try a synonym once, "
                 "then tell the user no notes were found. Do not invent file names."
