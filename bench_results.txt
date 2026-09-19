@@ -170,3 +170,48 @@ gemma4             ctx~ 4000 run0  in= 4194 out= 185  prefill=   6269 tok/s  dec
 gemma4             ctx~ 4000 run1  in= 4194 out= 205  prefill=   6250 tok/s  decode= 104.3 tok/s  ttft=  0.7s  total=  2.7s
 gemma4             ctx~ 8000 run0  in= 8354 out= 184  prefill=  10494 tok/s  decode= 101.8 tok/s  ttft=  0.8s  total=  2.7s
 gemma4             ctx~ 8000 run1  in= 8354 out= 159  prefill=  10508 tok/s  decode= 101.6 tok/s  ttft=  0.8s  total=  2.5s
+
+===== 2026-09-18 23:04  CTX=16384  SIZES=[300, 4000, 8000]  MAX_OUT=400 =====
+qwen3:14b          PS: qwen3:14b  size= 12.2 GB  vram= 10.6 GB  gpu= 87%  ctx=16384
+qwen3:14b          ctx~  300 run0  in=  346 out= 219  prefill=    909 tok/s  decode=  25.5 tok/s  ttft= 15.7s  total= 24.3s
+qwen3:14b          ctx~  300 run1  in=  346 out= 201  prefill=   1818 tok/s  decode=  25.9 tok/s  ttft=  0.2s  total=  8.0s
+qwen3:14b          ctx~ 4000 run0  in= 4120 out= 203  prefill=   2029 tok/s  decode=  23.3 tok/s  ttft=  2.0s  total= 10.8s
+qwen3:14b          ctx~ 4000 run1  in= 4120 out= 192  prefill=   2051 tok/s  decode=  23.6 tok/s  ttft=  2.0s  total= 10.4s
+qwen3:14b          ctx~ 8000 run0  in= 8200 out= 180  prefill=   2970 tok/s  decode=  20.4 tok/s  ttft=  2.8s  total= 12.0s
+qwen3:14b          ctx~ 8000 run1  in= 8200 out= 205  prefill=   3066 tok/s  decode=  20.6 tok/s  ttft=  2.7s  total= 13.2s
+qwen3:30b-a3b      retry after: an error was encountered while running the model: CUDA error
+qwen3:30b-a3b      ctx~  300 run0  CRASH: an error was encountered while running the model: CUDA error
+CUDA error: an illegal memory
+qwen3:30b-a3b      PS: qwen3:30b-a3b  size= 20.4 GB  vram= 10.5 GB  gpu= 51%  ctx=16384
+qwen3:30b-a3b      ctx~ 4000 run0  in= 4114 out= 400  prefill=   1624 tok/s  decode=  40.4 tok/s  ttft= 15.1s  total= 25.1s
+qwen3:30b-a3b      ctx~ 4000 run1  in= 4114 out= 400  prefill=   1655 tok/s  decode=  39.4 tok/s  ttft=  2.5s  total= 12.8s
+qwen3:30b-a3b      ctx~ 8000 run0  in= 8194 out= 400  prefill=   3313 tok/s  decode=  39.1 tok/s  ttft=  2.5s  total= 12.9s
+qwen3:30b-a3b      ctx~ 8000 run1  in= 8194 out= 400  prefill=   3440 tok/s  decode=  41.2 tok/s  ttft=  2.4s  total= 12.4s
+gpt-oss:20b        PS: gpt-oss:20b  size= 14.1 GB  vram= 10.0 GB  gpu= 71%  ctx=16384
+gpt-oss:20b        ctx~  300 run0  in=  395 out= 199  prefill=    993 tok/s  decode=  55.2 tok/s  ttft= 21.8s  total= 25.4s
+gpt-oss:20b        ctx~  300 run1  in=  395 out= 180  prefill=   1724 tok/s  decode=  54.7 tok/s  ttft=  0.2s  total=  3.5s
+gpt-oss:20b        ctx~ 4000 run0  in= 4169 out= 219  prefill=   3106 tok/s  decode=  53.9 tok/s  ttft=  1.3s  total=  5.5s
+gpt-oss:20b        ctx~ 4000 run1  in= 4169 out= 196  prefill=   3053 tok/s  decode=  54.2 tok/s  ttft=  1.4s  total=  5.1s
+gpt-oss:20b        ctx~ 8000 run0  in= 8249 out= 219  prefill=   5964 tok/s  decode=  53.7 tok/s  ttft=  1.4s  total=  5.6s
+gpt-oss:20b        ctx~ 8000 run1  in= 8249 out= 206  prefill=   6009 tok/s  decode=  54.0 tok/s  ttft=  1.4s  total=  5.4s
+ornith:9b          PS: ornith:9b  size=  5.9 GB  vram=  5.9 GB  gpu=100%  ctx=16384
+ornith:9b          ctx~  300 run0  in=  401 out= 211  prefill=   1808 tok/s  decode=  73.3 tok/s  ttft=  8.2s  total= 11.1s
+ornith:9b          ctx~  300 run1  in=  401 out= 192  prefill=   2694 tok/s  decode=  74.5 tok/s  ttft=  0.2s  total=  2.8s
+ornith:9b          ctx~ 4000 run0  in= 4175 out= 167  prefill=   3541 tok/s  decode=  71.7 tok/s  ttft=  1.2s  total=  3.6s
+ornith:9b          ctx~ 4000 run1  in= 4175 out= 219  prefill=   3553 tok/s  decode=  72.6 tok/s  ttft=  1.2s  total=  4.3s
+ornith:9b          ctx~ 8000 run0  in= 8255 out= 191  prefill=   5513 tok/s  decode=  70.9 tok/s  ttft=  1.5s  total=  4.4s
+ornith:9b          ctx~ 8000 run1  in= 8255 out= 199  prefill=   5607 tok/s  decode=  69.9 tok/s  ttft=  1.5s  total=  4.5s
+ornith:35b         PS: ornith:35b  size= 21.9 GB  vram= 10.4 GB  gpu= 48%  ctx=16384
+ornith:35b         ctx~  300 run0  in=  401 out= 207  prefill=    560 tok/s  decode=  58.8 tok/s  ttft= 31.0s  total= 34.5s
+ornith:35b         ctx~  300 run1  in=  401 out= 237  prefill=    690 tok/s  decode=  59.3 tok/s  ttft=  0.6s  total=  4.6s
+ornith:35b         ctx~ 4000 run0  in= 4175 out= 202  prefill=    955 tok/s  decode=  57.7 tok/s  ttft=  4.4s  total=  8.0s
+ornith:35b         ctx~ 4000 run1  in= 4175 out= 178  prefill=    957 tok/s  decode=  58.3 tok/s  ttft=  4.4s  total=  7.5s
+ornith:35b         ctx~ 8000 run0  in= 8255 out= 203  prefill=   1864 tok/s  decode=  57.6 tok/s  ttft=  4.4s  total=  8.1s
+ornith:35b         ctx~ 8000 run1  in= 8255 out= 248  prefill=   1855 tok/s  decode=  58.3 tok/s  ttft=  4.5s  total=  8.9s
+gemma4             PS: gemma4:latest  size=  3.2 GB  vram=  3.2 GB  gpu=100%  ctx=16384
+gemma4             ctx~  300 run0  in=  346 out= 185  prefill=   1782 tok/s  decode= 104.1 tok/s  ttft=  7.1s  total=  8.8s
+gemma4             ctx~  300 run1  in=  346 out= 137  prefill=   4397 tok/s  decode= 105.9 tok/s  ttft=  0.1s  total=  1.4s
+gemma4             ctx~ 4000 run0  in= 4194 out= 163  prefill=   6132 tok/s  decode= 100.4 tok/s  ttft=  0.7s  total=  2.3s
+gemma4             ctx~ 4000 run1  in= 4194 out= 173  prefill=   6011 tok/s  decode= 101.9 tok/s  ttft=  0.7s  total=  2.5s
+gemma4             ctx~ 8000 run0  in= 8354 out= 176  prefill=  10297 tok/s  decode=  98.9 tok/s  ttft=  0.8s  total=  2.7s
+gemma4             ctx~ 8000 run1  in= 8354 out= 165  prefill=  10303 tok/s  decode=  96.7 tok/s  ttft=  0.8s  total=  2.7s
