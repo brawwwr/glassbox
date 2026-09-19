@@ -103,5 +103,68 @@ Test-only, left on disk: qwen3.8:27b, muse-glimmer:30b.
 
 ---
 
-## Phase 2 — the naked agent loop
-(pending)
+## Phase 2 — the naked agent loop (19 Sep 2026)
+
+`agent.py` is a `for step in range(max_steps)` loop around one `ollama.chat` call. No tool_calls in the reply → that
+reply is the answer. Otherwise run each tool with `run_tool`, append the result as a `role: tool` message, go round again.
+Every model call and tool call is appended to `runs/<timestamp>.jsonl` (the hand-built trace Langfuse will replace in Phase 3).
+Tools (`tools.py`): `search_notes`, `read_note` (refuses paths outside `notes/`), `fetch_url` (http/https only, 4,000-char cap).
+Corpus: 38 notes + 4 decoys in `notes/`, one of which carries a hidden prompt injection. 20 test questions in `evals.json`;
+`run_evals.py` runs them and writes `evals/<model>-<ts>.csv`.
+
+### What the first runs taught (in order)
+
+1. **The tool was too literal.** First question ("what are my four VLANs and their subnets") → model searched `"VLAN subnet"`,
+   substring match found nothing, model gave up after one try. Fix in the tool, not the model: split into terms, match any order.
+2. **The model answered from titles.** Backups question: found the right notes, ignored the decoy, but hedged
+   ("this suggests you planned or conducted a drill") because it never opened the note. One SYSTEM line
+   ("read the note before answering; never answer from a title") → full factual answer with the filename.
+3. **Search fallback drowned the answer.** First full eval 16/20. UPS runtime, Pi-hole retention and thermals failed because
+   the any-term fallback returned 10 lines in filename order: `ups` matched inside `backups`, `log` matched everything.
+   Fix: rank lines by distinct terms matched, match at word starts, return the best 10 with `[3/4]` scores. All three now rank #1.
+4. **The model skipped the search.** Fan/GPU-temperature question: "No notes cover this", zero tool calls. SYSTEM line:
+   never claim no notes exist without having searched. Fixed.
+5. **The grader was naive.** gpt-oss writes narrow no-break spaces, non-breaking hyphens and curly quotes; "34 minutes" and
+   "couldn't" failed a raw substring check. Normalise Unicode before grading (`run_evals.norm`). Four false FAILs disappeared.
+
+Each of these is a one-line change. Together they took the 14B from 16/20 to 19/20 with the same weights.
+
+### Three models, same code, same 20 questions (after fixes 1–4, corrected for 5)
+
+| model        | pass  | tokens / question | seconds / question | avg steps | the one failure |
+|--------------|-------|-------------------|--------------------|-----------|-----------------|
+| qwen3:14b    | 19/20 | 2,854             | 3.1                | 2.6       | Q12: read only the August note, hedged about September |
+| gpt-oss:20b  | 19/20 | 3,266             | 5.2                | 3.0       | Q12: 2 searches + 2 reads, still missed September, then asserted "no September data" |
+| ornith:9b    | 19/20 | 4,102             | 3.4                | 3.0       | Q18: searched 8 times for "roof", never concluded, hit max_steps |
+
+Same accuracy, different costs, and three different failure personalities:
+- the 14B **under-reads** (stops after one note when two are needed);
+- gpt-oss **over-searches and over-asserts** (six searches on the kitchen question, 6,567 tokens, then a confident wrong
+  "no data" on Q12; confident-and-wrong is worse than the 14B's hedge);
+- the 9B **loops** (the runaway the step cap exists for; it was the only model to get Q12 right).
+
+All three: answered the no-tool questions directly, said "no notes" for the kitchen and roof questions (except the 9B loop),
+recognised the VLAN sandwich as a sandwich, and **ignored the injection** in the vendor-meeting note (nobody called fetch_url).
+
+### Cost intuition
+- The system prompt + three tool schemas cost ~600 tokens and are re-sent every step. A 3-step question is ~2,000 tokens
+  before any note content. Tool schemas are the contract, and the contract has a price.
+- Fixes 3 and 4 raised the 14B's cost from 2,238 to 2,854 tokens/question (+27%) and its score from 16 to 19. That is the
+  trade: reading notes instead of guessing costs tokens.
+- At a hosted price of ~$0.50 per million input tokens, 20 questions ≈ 60k tokens ≈ 3 cents. Locally: free, 60 seconds.
+
+### Reliability
+- Step cap caught the 9B's runaway at 8 steps. Without it that question runs until the context fills.
+- `num_predict=600` on every call (lesson from Phase 1's 15,983-token runaway).
+- `read_note` path check refused `../NOTES.md` in the self-test. Keep that test.
+
+### Pending re-run
+Added two SYSTEM lines after the comparison above: "if the question compares two things, read every relevant note"
+(for Q12) and "two empty searches means stop" (for the 9B loop). Final Phase 2 numbers for all three models: TODO.
+
+### Translation table (Phase 2)
+- tool schema ↔ custom connector action definition; the description IS the contract
+- while-loop with tool calls ↔ Do-until with Condition + Compose; max_steps ↔ iteration limit
+- `runs/*.jsonl` ↔ run history; the token counter ↔ API call count / duration
+- "read before answering" ↔ Get-item before Update-item; never act on a list row alone
+- prompt injection in a note ↔ untrusted payload in a trigger; treat content as data, never as instructions

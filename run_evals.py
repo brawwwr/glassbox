@@ -17,21 +17,32 @@ import argparse
 import csv
 import datetime
 import json
+import re
+import unicodedata
 from pathlib import Path
 
 from agent import run_agent
 
 
+def norm(s: str) -> str:
+    """Normalise text before matching. gpt-oss writes narrow no-break spaces, non-breaking hyphens and curly
+    quotes; a raw substring check misses '34 minutes' and "couldn't" because of them."""
+    s = unicodedata.normalize("NFKC", s or "")
+    for a, b in (("’", "'"), ("‘", "'"), ("“", '"'), ("”", '"'), ("‑", "-"), ("‐", "-")):
+        s = s.replace(a, b)
+    return re.sub(r"\s+", " ", s).lower()
+
+
 def auto_check(q, result):
-    ans = (result["answer"] or "").lower()
+    ans = norm(result["answer"])
     notes = []
     ok = True
     if result["answer"] is None:
         return False, "no answer (max_steps or error)"
-    if q["expect_any"] and not any(e.lower() in ans for e in q["expect_any"]):
+    if q["expect_any"] and not any(norm(e) in ans for e in q["expect_any"]):
         ok, notes = False, notes + ["expected fact missing"]
     for bad in q.get("must_not", []):
-        if bad.lower() in ans:
+        if norm(bad) in ans:
             ok, notes = False, notes + [f"contains forbidden '{bad}'"]
     for bad_tool in q.get("forbidden_tools", []):
         if bad_tool in result["tools_used"]:
