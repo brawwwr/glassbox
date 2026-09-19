@@ -215,3 +215,21 @@ gemma4             ctx~ 4000 run0  in= 4194 out= 163  prefill=   6132 tok/s  dec
 gemma4             ctx~ 4000 run1  in= 4194 out= 173  prefill=   6011 tok/s  decode= 101.9 tok/s  ttft=  0.7s  total=  2.5s
 gemma4             ctx~ 8000 run0  in= 8354 out= 176  prefill=  10297 tok/s  decode=  98.9 tok/s  ttft=  0.8s  total=  2.7s
 gemma4             ctx~ 8000 run1  in= 8354 out= 165  prefill=  10303 tok/s  decode=  96.7 tok/s  ttft=  0.8s  total=  2.7s
+
+===== 2026-09-19 09:34  CTX=16384  SIZES=[300, 4000, 8000]  MAX_OUT=400 =====
+qwen3:14b          PS: qwen3:14b  size= 12.2 GB  vram= 10.6 GB  gpu= 87%  ctx=16384
+qwen3:14b          ctx~  300 run0  in=  346 out= 192  prefill=   1031 tok/s  decode=  26.4 tok/s  ttft= 15.5s  total= 22.7s
+qwen3:14b          ctx~  300 run1  in=  346 out= 205  prefill=   1760 tok/s  decode=  26.6 tok/s  ttft=  0.2s  total=  7.9s
+qwen3:14b          ctx~ 4000 run0  in= 4120 out= 188  prefill=   1972 tok/s  decode=  23.4 tok/s  ttft=  2.1s  total= 10.2s
+qwen3:14b          ctx~ 4000 run1  in= 4120 out= 187  prefill=   1954 tok/s  decode=  23.4 tok/s  ttft=  2.1s  total= 10.3s
+qwen3:14b          ctx~ 8000 run0  in= 8200 out= 194  prefill=   2944 tok/s  decode=  20.3 tok/s  ttft=  2.8s  total= 12.7s
+qwen3:14b          ctx~ 8000 run1  in= 8200 out= 179  prefill=   2956 tok/s  decode=  20.3 tok/s  ttft=  2.8s  total= 12.1s
+
+===== 2026-09-19 09:50  CTX=8192  SIZES=[300, 4000, 8000]  MAX_OUT=400 =====
+qwen3:14b          PS: qwen3:14b  size= 10.3 GB  vram= 10.3 GB  gpu=100%  ctx=8192
+qwen3:14b          ctx~  300 run0  in=  346 out= 222  prefill=   1411 tok/s  decode=  45.8 tok/s  ttft=  4.2s  total=  9.0s
+qwen3:14b          ctx~  300 run1  in=  346 out= 219  prefill=   2263 tok/s  decode=  46.3 tok/s  ttft=  0.2s  total=  4.9s
+qwen3:14b          ctx~ 4000 run0  in= 4120 out= 187  prefill=   2425 tok/s  decode=  42.3 tok/s  ttft=  1.7s  total=  6.2s
+qwen3:14b          ctx~ 4000 run1  in= 4120 out= 223  prefill=   2429 tok/s  decode=  42.2 tok/s  ttft=  1.7s  total=  7.2s
+qwen3:14b          ctx~ 8000 run0  in= 4098 out= 214  prefill=   2258 tok/s  decode=  42.3 tok/s  ttft=  1.8s  total=  7.1s
+qwen3:14b          ctx~ 8000 run1  in= 4098 out= 206  prefill= 166673 tok/s  decode=  42.1 tok/s  ttft=  0.0s  total=  4.9s

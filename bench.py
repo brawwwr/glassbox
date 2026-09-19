@@ -24,9 +24,9 @@ MODELS = [
     "gpt-oss:20b",
     "ornith:9b",
     "ornith:35b",
-    "gemma4",
+   "gemma4",
 ]
-CTX = 16384              # context window we ask Ollama for (try 8192 for the cliff comparison)
+CTX = 8192              # context window we ask Ollama for (try 8192 for the cliff comparison)
 SIZES = [300, 4000, 8000]  # approx prompt tokens to test
 MAX_OUT = 400            # cap on output tokens; stops runaway generations
 OUT = "bench_results.txt"
@@ -61,7 +61,7 @@ def call(model, prompt):
         return ollama.chat(model=model, messages=msgs, options=opts)
 
 
-def call_with_retry(model, prompt, tries=2):
+def call_with_retry(model, prompt, tries=3):
     """Some models (qwen3:30b-a3b) crash the runner on their first request; a retry works."""
     for i in range(tries):
         try:
