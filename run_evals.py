@@ -61,6 +61,8 @@ def main():
     ap.add_argument("--ids", type=int, nargs="*", help="only run these question ids")
     ap.add_argument("--max-steps", type=int, default=8)
     ap.add_argument("--ctx", type=int, default=8192)
+    ap.add_argument("--temperature", type=float, default=0.0,
+                    help="0 = deterministic (default for evals). Ollama's default 0.8 makes single runs noisy by ~±1/20.")
     a = ap.parse_args()
 
     questions = json.loads(Path("evals.json").read_text())
@@ -68,7 +70,7 @@ def main():
         questions = [q for q in questions if q["id"] in a.ids]
 
     Path("evals").mkdir(exist_ok=True)
-    out = Path("evals") / f"{a.model.replace(':', '_')}-{datetime.datetime.now():%Y%m%d-%H%M}.csv"
+    out = Path("evals") / f"{a.model.replace(':', '_')}-t{a.temperature:g}-{datetime.datetime.now():%Y%m%d-%H%M}.csv"
     fields = ["id", "category", "question", "answer", "steps", "tokens", "seconds", "tools_used", "auto_pass", "notes"]
 
     passed = 0
@@ -78,7 +80,8 @@ def main():
         w.writeheader()
         for q in questions:
             print(f"\n=== Q{q['id']} [{q['category']}] {q['question']}", flush=True)
-            r = run_agent(q["question"], model=a.model, max_steps=a.max_steps, ctx=a.ctx, quiet=True)
+            r = run_agent(q["question"], model=a.model, max_steps=a.max_steps, ctx=a.ctx, quiet=True,
+                          temperature=a.temperature)
             ok, notes = auto_check(q, r)
             passed += ok
             tot_tokens += r["tokens_in"] + r["tokens_out"]

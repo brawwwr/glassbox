@@ -49,15 +49,17 @@ def think_arg(model: str):
     return "low" if model.startswith("gpt-oss") else False
 
 
-def chat(model, messages, ctx, max_out):
+def chat(model, messages, ctx, max_out, temperature=None):
     opts = {"num_ctx": ctx, "num_predict": max_out}
+    if temperature is not None:
+        opts["temperature"] = temperature           # 0 = deterministic; use for evals so runs are comparable
     try:
         return ollama.chat(model=model, messages=messages, tools=TOOLS, options=opts, think=think_arg(model))
     except TypeError:                                  # older client without think=
         return ollama.chat(model=model, messages=messages, tools=TOOLS, options=opts)
 
 
-def run_agent(question, model="qwen3:14b", max_steps=8, ctx=8192, max_out=600, quiet=False):
+def run_agent(question, model="qwen3:14b", max_steps=8, ctx=8192, max_out=600, quiet=False, temperature=None):
     Path("runs").mkdir(exist_ok=True)
     trace_path = Path("runs") / f"{datetime.datetime.now():%Y%m%d-%H%M%S}.jsonl"
 
@@ -74,11 +76,11 @@ def run_agent(question, model="qwen3:14b", max_steps=8, ctx=8192, max_out=600, q
     tokens_in = tokens_out = 0
     tools_used = []
     t_start = time.time()
-    trace(kind="start", model=model, question=question, max_steps=max_steps, ctx=ctx)
+    trace(kind="start", model=model, question=question, max_steps=max_steps, ctx=ctx, temperature=temperature)
 
     for step in range(1, max_steps + 1):
         t0 = time.time()
-        resp = chat(model, messages, ctx, max_out)
+        resp = chat(model, messages, ctx, max_out, temperature)
         dt = time.time() - t0
         tokens_in += resp.prompt_eval_count or 0
         tokens_out += resp.eval_count or 0

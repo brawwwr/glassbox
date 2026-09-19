@@ -23,7 +23,7 @@ Everything runs locally and free: Ollama on Windows, Python in WSL2, Docker for 
 
 0. Plumbing — WSL2, CUDA, Ollama, Docker ✔
 1. Baseline numbers — bench eight models, find the VRAM cliff ✔
-2. Naked agent loop — ~100 lines, no framework ✔ (19/20 on three models; see NOTES.md)
+2. Naked agent loop — ~100 lines, no framework ✔ (18–20/20 on three models; see NOTES.md)
 3. Macro lens — Langfuse traces
 4. Micro lens — TransformerLens attention and logit lens
 5. One screen — Gradio page showing both lenses

@@ -158,9 +158,28 @@ recognised the VLAN sandwich as a sandwich, and **ignored the injection** in the
 - `num_predict=600` on every call (lesson from Phase 1's 15,983-token runaway).
 - `read_note` path check refused `../NOTES.md` in the self-test. Keep that test.
 
-### Pending re-run
-Added two SYSTEM lines after the comparison above: "if the question compares two things, read every relevant note"
-(for Q12) and "two empty searches means stop" (for the 9B loop). Final Phase 2 numbers for all three models: TODO.
+### Final run — after two more SYSTEM lines ("read every relevant note for comparisons"; "two empty searches means stop")
+
+| model        | pass  | tokens / question | seconds / question | Q12 (two-note) | Q18 (roof, nothing exists) |
+|--------------|-------|-------------------|--------------------|----------------|----------------------------|
+| gpt-oss:20b  | 20/20 | 3,488             | 4.4                | PASS, 6 steps, 10,715 tokens | 2 searches then "no notes" (was 2) |
+| ornith:9b    | 20/20 | 3,732             | 2.9                | PASS, 5 steps, 9,336 tokens  | 2 searches then "no notes" (was 8 → max_steps) |
+| qwen3:14b    | 18/20 | 3,073             | 3.3                | FAIL: one read, hedged (same as before) | pass |
+
+The prompt lines worked for two of the three models: both now do the two reads on Q12 (at 3–4× the cost of a normal
+question, the price of thoroughness), and the 9B stopped looping. The 14B did not pick up the multi-read instruction,
+and it also **regressed on Q5** — identical prompt and code, but this time "No notes cover this" with zero tool calls,
+where the previous run searched and passed. Nothing changed except the sampling.
+
+**Lesson: single eval runs are noisy.** Ollama's default temperature is 0.8; a borderline decision ("is this a notes
+question?") can flip between runs, so one pass of 20 questions carries about ±1 of noise. Any comparison finer than
+that needs several runs or temperature 0. `run_evals.py` now defaults to `--temperature 0`, and CSV filenames carry it
+(`-t0-`). The runs above were at the default 0.8; re-running at 0 is the first thing to do in Phase 8.
+
+**Phase 2 verdict.** The loop works; the failure modes are understood; the small model that fits entirely in VRAM
+(ornith:9b, 100% GPU, 2.9 s/question) matched or beat the two larger ones on this corpus. For Phase 3 onward the
+working model stays qwen3:14b (best tool-calling pedigree, the plan's choice) with ornith:9b as the fast comparison,
+gpt-oss:20b as the different lineage. Whether the 9B's edge holds at temperature 0 is the open question.
 
 ### Translation table (Phase 2)
 - tool schema ↔ custom connector action definition; the description IS the contract
@@ -168,3 +187,9 @@ Added two SYSTEM lines after the comparison above: "if the question compares two
 - `runs/*.jsonl` ↔ run history; the token counter ↔ API call count / duration
 - "read before answering" ↔ Get-item before Update-item; never act on a list row alone
 - prompt injection in a note ↔ untrusted payload in a trigger; treat content as data, never as instructions
+- temperature 0.8 vs 0 ↔ a flow with a random element vs a deterministic one; you cannot regression-test the former with one run
+
+---
+
+## Phase 3 — macro lens: Langfuse traces
+(pending)
