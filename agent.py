@@ -111,6 +111,23 @@ def think_arg(model: str):
     return "low" if model.startswith("gpt-oss") else False
 
 
+# Illustrative hosted prices, $ per 1M tokens (input, output). Our runs are free; this builds cost intuition.
+# Keep in step with scratch/03_trace_summary.py and the Langfuse model definitions.
+PRICES = {
+    "qwen3:14b": (0.20, 0.60),
+    "ornith:9b": (0.10, 0.30),
+    "gpt-oss:20b": (0.10, 0.50),
+    "qwen3:30b-a3b": (0.15, 0.60),
+    "ornith:35b": (0.20, 0.60),
+    "gemma4": (0.05, 0.20),
+}
+
+
+def est_cost(model: str, tokens_in: int, tokens_out: int):
+    pin, pout = PRICES.get(model, PRICES.get(model.split(":")[0], (0.0, 0.0)))
+    return {"input": tokens_in / 1e6 * pin, "output": tokens_out / 1e6 * pout}
+
+
 @observe(as_type="generation", name="ollama.chat")
 def chat(model, messages, ctx, max_out, temperature=None):
     """One model call. In Langfuse this is a 'generation': it carries model name and token usage."""
@@ -127,6 +144,7 @@ def chat(model, messages, ctx, max_out, temperature=None):
        output=resp.message.content or [{"tool_call": c.function.name, "args": c.function.arguments}
                                        for c in (resp.message.tool_calls or [])],
        usage_details={"input": resp.prompt_eval_count or 0, "output": resp.eval_count or 0},
+       cost_details=est_cost(model, resp.prompt_eval_count or 0, resp.eval_count or 0),
        metadata={"num_ctx": ctx, "num_predict": max_out, "temperature": temperature,
                  "eval_ms": round((resp.eval_duration or 0) / 1e6),
                  "prompt_eval_ms": round((resp.prompt_eval_duration or 0) / 1e6),
@@ -188,7 +206,9 @@ def run_agent(question, model="qwen3:14b", max_steps=8, ctx=8192, max_out=600, q
             seconds = round(time.time() - t_start, 2)
             trace(kind="end", steps=step, tokens_in=tokens_in, tokens_out=tokens_out, seconds=seconds, answer=answer[:1000])
             say(f"\n{answer}\n")
-            say(f"done in {step} step(s), {seconds:.1f}s, {tokens_in + tokens_out} tokens  -> {trace_path}")
+            c = est_cost(model, tokens_in, tokens_out)
+            say(f"done in {step} step(s), {seconds:.1f}s, {tokens_in + tokens_out} tokens, "
+                f"est. hosted cost ${c['input'] + c['output']:.5f}  -> {trace_path}")
             result = {"answer": answer, "steps": step, "tokens_in": tokens_in, "tokens_out": tokens_out,
                       "seconds": seconds, "tools_used": tools_used, "trace": str(trace_path), "error": None}
             break
@@ -212,9 +232,12 @@ def run_agent(question, model="qwen3:14b", max_steps=8, ctx=8192, max_out=600, q
         result = {"answer": None, "steps": max_steps, "tokens_in": tokens_in, "tokens_out": tokens_out,
                   "seconds": seconds, "tools_used": tools_used, "trace": str(trace_path), "error": "max_steps reached"}
 
+    cost = est_cost(model, tokens_in, tokens_out)
+    result["est_cost_usd"] = round(cost["input"] + cost["output"], 6)
     lf("update_current_span", output=result["answer"],
        metadata={"model": model, "steps": result["steps"], "tokens_in": tokens_in, "tokens_out": tokens_out,
-                 "seconds": result["seconds"], "tools_used": tools_used, "error": result["error"]})
+                 "seconds": result["seconds"], "tools_used": tools_used, "error": result["error"],
+                 "est_cost_usd": result["est_cost_usd"]})
     return result
 
 
