@@ -1,33 +1,30 @@
-# NEXT — Phase 3, Langfuse (updated 21 Sep 2026)
+# NEXT — Phase 3, first trace (updated 21 Sep 2026)
 
-State at last pause: Langfuse cloned to `~/langfuse`; first start failed (Postgres password mismatch);
-volumes wiped with `docker compose down -v`; no `.env` files exist yet.
+Langfuse is up (SDK 4.15.4 installed). agent.py now traces to Langfuse when .env has the keys.
 
 ## [PC-Ubuntu]
 
 ```bash
 cd ~/glassbox && git pull
-bash scratch/03_langfuse_env.sh          # asks for a login e-mail + password, writes both .env files
-cd ~/langfuse && docker compose up -d
-sleep 45 && docker compose ps            # everything running/healthy, incl. langfuse-web
+uv run agent.py "What are my four VLANs and their subnets?"
 ```
 
-If `langfuse-web` keeps restarting:
-
-```bash
-docker compose logs --tail 30 langfuse-web
-```
+Expected first line: `[trace] Langfuse tracing ON -> http://localhost:3000`, then the usual step log.
+If you see any `[trace] langfuse.<method>(...) failed:` lines, copy them for Claude — that means the
+SDK 4.x API renamed something and one line in agent.py needs changing. The agent still completes.
 
 ## [Browser on PC]
 
-http://localhost:3000 → log in with the e-mail/password you typed → project `glassbox` should exist.
+http://localhost:3000 → project glassbox → **Traces**. You should see one trace named `glassbox-agent`
+with the question as input. Click it: a waterfall of `ollama.chat` generations (with token counts) and
+`search_notes` / `read_note` spans.
 
-## [PC-Ubuntu] once logged in
+Tell Claude: did the trace appear, does each generation show input/output tokens, and any `[trace]` warnings.
+
+## Then (same session, if the trace looks right)
 
 ```bash
-cd ~/glassbox
-uv add langfuse python-dotenv
-uv pip show langfuse | head -2           # tell Claude the version
+uv run run_evals.py --ids 1 11 12 17 20          # five traced questions, quick
 ```
 
-Then Claude writes the traced agent into the repo (Mac) → you `git pull` and run it.
+and compare a run's `runs/<ts>.jsonl` with its Langfuse waterfall — every JSONL line should be a span.

@@ -21,7 +21,7 @@ import re
 import unicodedata
 from pathlib import Path
 
-from agent import run_agent
+from agent import run_agent, flush
 
 
 def norm(s: str) -> str:
@@ -81,7 +81,7 @@ def main():
         for q in questions:
             print(f"\n=== Q{q['id']} [{q['category']}] {q['question']}", flush=True)
             r = run_agent(q["question"], model=a.model, max_steps=a.max_steps, ctx=a.ctx, quiet=True,
-                          temperature=a.temperature)
+                          temperature=a.temperature, tags=[f"q{q['id']}", q["category"], "eval"])
             ok, notes = auto_check(q, r)
             passed += ok
             tot_tokens += r["tokens_in"] + r["tokens_out"]
@@ -94,6 +94,7 @@ def main():
                         "seconds": r["seconds"], "tools_used": " ".join(r["tools_used"]),
                         "auto_pass": ok, "notes": notes})
 
+    flush()
     n = len(questions)
     print(f"\n{a.model}: {passed}/{n} auto-pass, {tot_tokens} tokens, {tot_seconds:.0f}s total, "
           f"{tot_tokens / n:.0f} tokens and {tot_seconds / n:.1f}s per question  -> {out}")
