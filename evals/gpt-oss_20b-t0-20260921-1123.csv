@@ -1,0 +1,15 @@
+id,category,question,answer,steps,tokens,seconds,tools_used,auto_pass,notes
+12,tool-multi,How did my desktop thermals change between August and September?,"In August the 30‑minute GPU stress test gave:
+
+- GPU peak 71 °C (fan 68 %)
+- CPU 82 °C
+- NVMe 64 °C
+
+After installing a second exhaust fan and re‑testing in September the temperatures dropped to:
+
+- GPU 67 °C
+- CPU 76 °C
+- NVMe 59 °C
+
+So the desktop ran about 4 °C cooler on the GPU, 6 °C cooler on the CPU, and 5 °C cooler on the NVMe.  
+(See `2026-08-15-desktop-thermals.md` and `2026-09-14-second-exhaust-fan.md`.)",6,10812,34.61,search_notes read_note search_notes search_notes read_note,True,

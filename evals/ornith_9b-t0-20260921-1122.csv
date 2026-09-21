@@ -1,0 +1,8 @@
+id,category,question,answer,steps,tokens,seconds,tools_used,auto_pass,notes
+12,tool-multi,How did my desktop thermals change between August and September?,"After installing a second exhaust fan (top rear), your desktop thermals improved under the same 30-minute GPU stress test:
+
+- **GPU (RTX 4070):** 71 C → 67 C (−4 C)
+- **CPU:** 82 C → 76 C (−6 C)
+- **NVMe (F:):** 64 C → 59 C (−5 C)
+
+Source: `2026-08-15-desktop-thermals.md` and `2026-09-14-second-exhaust-fan.md`.",5,9336,21.28,search_notes read_note search_notes read_note,True,

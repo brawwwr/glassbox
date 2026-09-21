@@ -1,0 +1,10 @@
+run               model        steps  wall s  model s  tool s model%  tok in tok out    est $  question
+20260921-110619   qwen3:14b        3     2.2      2.2   0.002   100%    2961      79  0.00064  what hydration did sourdough attempt 3 use
+20260921-112214   ornith:9b        5    21.3     21.3   0.005   100%    9068     268  0.00099  How did my desktop thermals change between Au
+20260921-112338   gpt-oss:20b      6    34.6     34.6   0.013   100%   10471     341  0.00122  How did my desktop thermals change between Au
+------------------------------------------------------------------------------------------------------------------------
+TOTAL                                   58.1     58.1   0.020   100%   22500     688  0.00284
+
+Model time 99.9% of wall time; tools 0.03%; the rest is Python/HTTP overhead. Estimated hosted cost for these 3 runs: $0.0028 ($0.00095 per question).
+
+(Langfuse API cross-check skipped: NotFoundError: headers: {'x-robots-tag': 'noindex', 'x-content-type-options': 'nosniff', 'refer)
