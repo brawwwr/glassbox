@@ -162,8 +162,7 @@ def run_agent(question, model="qwen3:14b", max_steps=8, ctx=8192, max_out=600, q
     tools_used = []
     t_start = time.time()
     trace(kind="start", model=model, question=question, max_steps=max_steps, ctx=ctx, temperature=temperature)
-    # Langfuse SDK 4.x: trace-level input/output via set_current_trace_io; everything else on the root span.
-    lf("set_current_trace_io", input=question)
+    # Langfuse SDK 4.x: the root span's input/output become the trace's; tags come from propagate_attributes.
     lf("update_current_span", name="glassbox-agent", input=question,
        metadata={"model": model, "tags": [model] + list(tags or []), "max_steps": max_steps, "ctx": ctx,
                  "temperature": temperature, "jsonl": str(trace_path)})
@@ -213,7 +212,6 @@ def run_agent(question, model="qwen3:14b", max_steps=8, ctx=8192, max_out=600, q
         result = {"answer": None, "steps": max_steps, "tokens_in": tokens_in, "tokens_out": tokens_out,
                   "seconds": seconds, "tools_used": tools_used, "trace": str(trace_path), "error": "max_steps reached"}
 
-    lf("set_current_trace_io", output=result["answer"])
     lf("update_current_span", output=result["answer"],
        metadata={"model": model, "steps": result["steps"], "tokens_in": tokens_in, "tokens_out": tokens_out,
                  "seconds": result["seconds"], "tools_used": tools_used, "error": result["error"]})
