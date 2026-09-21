@@ -260,9 +260,20 @@ after one read) and got the answer. The right answer cost ~50% more tokens. That
 - input:output 22:1 ↔ every action re-reading the whole payload; the fix in both worlds is to send less context
 - temperature 0 ↔ removing the random element so a regression test means something
 
-### Still to do in this phase
-- Screenshot: q12 waterfall, 14B, into `screenshots/`.
-- Two models, one question, side by side (q12 on qwen3:14b vs ornith:9b / gpt-oss:20b) — traced. Can fold into Phase 8.
+### One question, three models, traced (Q12: thermals August vs September; all three correct)
+
+| model        | steps | tokens | wall   | est. cost | note |
+|--------------|-------|--------|--------|-----------|------|
+| qwen3:14b    | 4     | 6,266  | 5.9 s  | $0.0014   | model already resident |
+| ornith:9b    | 5     | 9,336  | 21.3 s | $0.0010   | includes ~7 s model load |
+| gpt-oss:20b  | 6     | 10,812 | 34.6 s | $0.0012   | includes ~20 s model load |
+
+Pure model time (loads removed): ~6 / ~14 / ~15 s. The 14B was most efficient in steps and tokens; the 9B cheapest in
+dollars (lower price per token); gpt-oss took the most steps (its over-searching habit from Phase 2). The load times
+are the Phase 1 lesson again: **switching models costs 7–20 s every time**, so a multi-model agent on 12 GB pays that
+on every switch unless everything fits at once. In Langfuse: filter Traces by tag `q12` to see the three side by side.
+
+**Phase 3 checkpoint reached 21 Sep.** Screenshot of the q12 waterfall: `screenshots/phase3-q12-waterfall.png` (TODO if missing).
 
 ---
 
