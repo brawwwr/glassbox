@@ -273,7 +273,12 @@ dollars (lower price per token); gpt-oss took the most steps (its over-searching
 are the Phase 1 lesson again: **switching models costs 7–20 s every time**, so a multi-model agent on 12 GB pays that
 on every switch unless everything fits at once. In Langfuse: filter Traces by tag `q12` to see the three side by side.
 
-**Phase 3 checkpoint reached 21 Sep.** Screenshot of the q12 waterfall: `screenshots/phase3-q12-waterfall.png` (TODO if missing).
+**Phase 3 checkpoint reached 21 Sep.** Screenshot: `screenshots/phase3-q12-waterfall.png` — actually the sourdough
+trace in Langfuse's **Graph** view: `__start__ → glassbox-agent → search_notes → ollama.chat (3/3) → read_note → __end__`,
+header strip `Latency 2.19s · $0.00064 · 2,961 → 79 tokens · qwen3:14b`, root metadata showing steps/tokens/tools_used/
+jsonl path/est_cost. The tracer drew the agent loop as a flow diagram from the spans alone — it looks like a Power Automate
+flow, which is the translation table in one picture. TODO for the deck: the same trace's **Timeline** tab (time bars) and
+the q12 trace, so there is one picture of structure and one of time.
 
 ---
 
