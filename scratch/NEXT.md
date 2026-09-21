@@ -1,42 +1,36 @@
-# NEXT — Phase 3, traces are flowing (updated 21 Sep 2026)
+# NEXT — Phase 3 wrap-up, then Phase 4 (updated 21 Sep 2026)
 
-First traced run worked (backups question: search → read → answer, 3,763 tokens). Deprecated call removed.
+Phase 3 write-up is in NOTES.md. Two small things close the phase.
 
-## [PC-Ubuntu]
+## [Browser on PC] — the checkpoint screenshot
+
+Langfuse → Traces → click the row "How did my desktop thermals change…" (the 4-step one).
+Win+Shift+S, drag over the waterfall (tree + time bars). Save as `phase3-q12-waterfall.png` into
+`\\wsl.localhost\Ubuntu-24.04\home\administrator\glassbox\screenshots\` (paste that path into the Save dialog),
+or save anywhere on Windows and copy later.
+
+## [PC-Ubuntu] — optional: the same question on two other models, traced (2 minutes)
 
 ```bash
 cd ~/glassbox && git pull
-uv run run_evals.py --ids 1 11 12 17 20        # five traced questions, tagged q1/q11/q12/q17/q20
+uv run run_evals.py --ids 12 --model ornith:9b
+uv run run_evals.py --ids 12 --model gpt-oss:20b
+uv run scratch/03_trace_summary.py 3 > evals/trace_summary_q12_3models.txt
+git add -A && git commit -m "phase3: q12 on three models, traced" && git push
 ```
 
-## [Browser on PC] — read the waterfall
+Then in Langfuse → Traces, filter/search for `q12`: three traces, three models, same question. Compare steps,
+latency, tokens, cost in the list view. That is the two-lens comparison slide in miniature.
 
-1. Langfuse → Traces. Each row: Input = question, Output = answer, Latency, Usage (tokens), Tags.
-2. Click the q12 trace (thermals August vs September). Left: the tree — `glassbox-agent` root, then
-   alternating `ollama.chat` (generation) and `search_notes` / `read_note` (spans). Right: details of the
-   selected row. Click an `ollama.chat` row: header shows latency and usage (input → output tokens);
-   below, Input (the last message sent) and Output (the model's reply or the tool call it asked for).
-3. Note for NOTES.md: where does the wall time go? Add up the `ollama.chat` durations vs the tool
-   durations for one trace. Expect >95% model, <5% tools.
-
-## [Browser on PC] — model prices (so Cost stops reading 0)
-
-Settings (gear, bottom-left) → Models → New model definition, three times:
-
-| match pattern (regex) | input $/1M tokens | output $/1M tokens | comparable hosted model |
-|---|---|---|---|
-| `(?i)^qwen3:14b$`    | 0.20 | 0.60 | a hosted 14B-class open model |
-| `(?i)^ornith:9b$`    | 0.10 | 0.30 | a hosted 8–9B-class open model |
-| `(?i)^gpt-oss:20b$`  | 0.10 | 0.50 | gpt-oss-20b on a hosted provider |
-
-(Prices are illustrative; write down which provider's list price you used in NOTES.md. Only new
-traces get costed.)
-
-## [PC-Ubuntu] — compare the two traces of one run
+## Then: PHASE 3 CHECKPOINT commit
 
 ```bash
-ls -t runs/*.jsonl | head -1 | xargs cat
+cd ~/glassbox && git add -A && git commit -m "phase3: checkpoint" && git push
 ```
 
-Every JSONL line (start / model / tool / end) corresponds to one row in the Langfuse tree. Tell Claude
-the trace looks right and the mapping is clear → Claude writes the Phase 3 section of NOTES.md.
+## Phase 4 preview (next session) — micro lens
+
+Claude writes `scratch/04_replay.py`: loads a small Qwen3 (1.7B or 0.6B) with plain transformers, renders the exact
+Phase 2 prompt with `apply_chat_template(tools=TOOLS)`, and plots attention from the `<tool_call>` token back to
+the question. Needs `uv add transformers accelerate matplotlib` (torch is already there). ~3 GB model download from
+Hugging Face. Ollama's KEEP_ALIVE will free VRAM after 10 min, or `ollama stop qwen3:14b` first.

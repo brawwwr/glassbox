@@ -18,13 +18,16 @@ Everything runs locally and free: Ollama on Windows, Python in WSL2, Docker for 
 - `notes/` — the markdown corpus the agent searches (Phase 2+). `notes_corpus_README.md` lists the decoys and test questions.
 - `tools.py`, `agent.py` — Phase 2: three tools and the ~40-line agent loop. `uv run agent.py "your question"`.
 - `evals.json`, `run_evals.py` — 20 test questions and a runner that writes `evals/<model>-<ts>.csv`.
+- `scratch/` — hand-off scripts and `NEXT.md`, the live step list. `scratch/03_langfuse_env.sh` sets up Langfuse secrets;
+  `scratch/03_trace_summary.py` reports time split and estimated cost from `runs/*.jsonl`.
+- `agent.py` traces to a self-hosted Langfuse when `.env` has keys (Phase 3); `--no-trace` to disable.
 
 ## Phases
 
 0. Plumbing — WSL2, CUDA, Ollama, Docker ✔
 1. Baseline numbers — bench eight models, find the VRAM cliff ✔
 2. Naked agent loop — ~100 lines, no framework ✔ (18–20/20 on three models; see NOTES.md)
-3. Macro lens — Langfuse traces
+3. Macro lens — Langfuse traces ✔ (99.9% of wall time is the model; cost is 88% input tokens; see NOTES.md)
 4. Micro lens — TransformerLens attention and logit lens
 5. One screen — Gradio page showing both lenses
 6. MCP — swap an in-process tool for an MCP server

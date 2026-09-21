@@ -191,5 +191,80 @@ gpt-oss:20b as the different lineage. Whether the 9B's edge holds at temperature
 
 ---
 
-## Phase 3 — macro lens: Langfuse traces
+## Phase 3 — macro lens: Langfuse traces (19–21 Sep 2026)
+
+Langfuse self-hosted (v4 image, `docker compose` in WSL: Postgres, ClickHouse, Redis, MinIO, web, worker; data on `F:\Docker`).
+Python SDK 4.15.4. `agent.py` traces automatically when `.env` has the keys; `--no-trace` turns it off. The hand-built
+`runs/<ts>.jsonl` is still written, so every run has two traces of the same thing.
+
+### What a span is (the mapping)
+
+| `runs/<ts>.jsonl` line | Langfuse row | carries |
+|---|---|---|
+| `kind: start` … `kind: end` | root span `glassbox-agent` (= the trace) | question as input, answer as output, steps/tokens/seconds/cost in metadata |
+| `kind: model` | `ollama.chat` **generation** | model name, input/output tokens, latency, the tool call it asked for, `cost_details` |
+| `kind: tool` | `search_notes` / `read_note` **span** | tool name, arguments, result size, latency |
+
+A trace is a tree of timed spans. A generation is a span that also knows about a model and tokens. The waterfall is
+the tree drawn against time. Everything else in the UI (cost, filters, dashboards) is aggregation over those rows.
+The JSONL logger from Phase 2 was already a tracer; Langfuse adds a UI, aggregation and a place for cost.
+
+### Where the time goes (12 traced runs, qwen3:14b, resident model)
+
+| | seconds | share |
+|---|---|---|
+| model (`ollama.chat`) | 57.4 | **99.9%** |
+| tools (grep + read over 42 files) | 0.033 | 0.06% |
+| everything else | ~0 | — |
+
+Tools take 2–4 ms each. **When an agent feels slow it is the model**, and the levers are fewer steps, shorter outputs,
+or a faster/smaller model. Nothing else is measurable.
+
+### Where the cost goes
+
+12 runs: 43,244 input tokens, 1,944 output tokens — **22 : 1**. The whole conversation (system prompt, three tool
+schemas, prior tool results) is re-sent on every step; the answer is a few hundred tokens once.
+At illustrative hosted prices ($0.20 / $0.60 per 1M for a 14B-class model) that is $0.0086 input + $0.0012 output:
+**88% of the cost is input**. Twelve questions ≈ 1 cent; $0.0008 per question; 1,000 questions ≈ 80 cents.
+Context growth across steps for one question: 820 → 1,502 → 1,958 input tokens (visible per generation in the UI).
+
+### Determinism, seen
+Same question, same code, two runs at temperature 0 (via `run_evals.py`): VLANs 3,717 / 231 tokens both times;
+backups 3,556 / 228 both times. Token-for-token identical paths. That is what makes eval CSVs comparable.
+Wall time still varies (sourdough: 6.0 s then 2.2 s, identical tokens) — GPU clocks and cache, not the model.
+
+### Q12 on the 14B, finally
+One traced run of the two-note thermals question took 4 steps and 6,266 tokens (vs 3 steps / ~4,100 when it stopped
+after one read) and got the answer. The right answer cost ~50% more tokens. That trade-off is now a number.
+
+### Setup: what bit (an evening's worth)
+- **Langfuse compose default `DATABASE_URL` embeds the default Postgres password.** Randomising `POSTGRES_PASSWORD`
+  alone → web container restart-loops with Prisma `P1000`. Fix: set `DATABASE_URL` explicitly in `.env`.
+  After a failed first start, `docker compose down -v` before retrying, or Postgres keeps the old password.
+- The `.env` block pasted into the terminal never landed once (probably interrupted at the edit-me lines).
+  Replaced by `scratch/03_langfuse_env.sh`, which prompts for email/password and generates everything else.
+  `LANGFUSE_INIT_*` variables pre-create the login, org, project and API keys, so no sign-up screen.
+- **Python SDK 4.x API differs from the v3 docs I knew**: `update_current_trace` is gone; `set_current_trace_io`
+  exists but is deprecated in favour of the root span's `update_current_span(input=…, output=…)`; tags go through
+  `propagate_attributes(tags=[…])` as a context manager. `update_current_generation(usage_details=…, cost_details=…)`
+  and `update_current_span` work as before. Discovered by printing `dir(get_client())`.
+- **Model definitions in Settings → Models never priced our traces** (pattern `(?i)^qwen3:14b$`, model name matched,
+  cost column stayed `-`). Sidestepped by attaching `cost_details` from the agent itself using the same price table
+  (`PRICES` in agent.py). Arguably better: the cost arithmetic is in our code, not in a UI.
+- Secrets hygiene for a public repo: Langfuse's `.env` lives in `~/langfuse/`, the agent's keys in `~/glassbox/.env`
+  (git-ignored). `git status` must never list `.env`.
+
+### Translation table (Phase 3)
+- trace ↔ one flow run; span ↔ one action in run history; generation ↔ the AI action with its token bill
+- 99.9% model time ↔ 90% of a slow flow was one HTTP action (July note): find the one step, ignore the rest
+- input:output 22:1 ↔ every action re-reading the whole payload; the fix in both worlds is to send less context
+- temperature 0 ↔ removing the random element so a regression test means something
+
+### Still to do in this phase
+- Screenshot: q12 waterfall, 14B, into `screenshots/`.
+- Two models, one question, side by side (q12 on qwen3:14b vs ornith:9b / gpt-oss:20b) — traced. Can fold into Phase 8.
+
+---
+
+## Phase 4 — micro lens: TransformerLens
 (pending)
