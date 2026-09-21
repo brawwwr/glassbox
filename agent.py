@@ -48,9 +48,27 @@ if TRACING:
         print(f"[trace] Langfuse import failed ({e}); running untraced", flush=True)
         TRACING = False
 
+try:                                             # SDK 4.x: tags live in a context manager
+    from langfuse import propagate_attributes
+except Exception:
+    propagate_attributes = None
+
 if not TRACING:
     def observe(*_a, **_k):                      # no-op decorator with the same call shape
         return lambda f: f
+
+
+def with_tags(tags):
+    """Context manager that attaches tags to everything created inside it, if the SDK supports it."""
+    import contextlib
+    if TRACING and propagate_attributes is not None and tags:
+        try:
+            return propagate_attributes(tags=list(tags))
+        except Exception as e:
+            if "propagate_attributes" not in _lf_warned:
+                _lf_warned.add("propagate_attributes")
+                print(f"[trace] propagate_attributes failed: {str(e)[:100]}", flush=True)
+    return contextlib.nullcontext()
 
 
 def lf(method: str, **kwargs):
@@ -144,8 +162,11 @@ def run_agent(question, model="qwen3:14b", max_steps=8, ctx=8192, max_out=600, q
     tools_used = []
     t_start = time.time()
     trace(kind="start", model=model, question=question, max_steps=max_steps, ctx=ctx, temperature=temperature)
-    lf("update_current_trace", name="glassbox-agent", input=question, tags=[model] + list(tags or []),
-       metadata={"max_steps": max_steps, "ctx": ctx, "temperature": temperature, "jsonl": str(trace_path)})
+    # Langfuse SDK 4.x: trace-level input/output via set_current_trace_io; everything else on the root span.
+    lf("set_current_trace_io", input=question)
+    lf("update_current_span", name="glassbox-agent", input=question,
+       metadata={"model": model, "tags": [model] + list(tags or []), "max_steps": max_steps, "ctx": ctx,
+                 "temperature": temperature, "jsonl": str(trace_path)})
 
     result = None
     for step in range(1, max_steps + 1):
@@ -192,8 +213,9 @@ def run_agent(question, model="qwen3:14b", max_steps=8, ctx=8192, max_out=600, q
         result = {"answer": None, "steps": max_steps, "tokens_in": tokens_in, "tokens_out": tokens_out,
                   "seconds": seconds, "tools_used": tools_used, "trace": str(trace_path), "error": "max_steps reached"}
 
-    lf("update_current_trace", output=result["answer"],
-       metadata={"steps": result["steps"], "tokens_in": tokens_in, "tokens_out": tokens_out,
+    lf("set_current_trace_io", output=result["answer"])
+    lf("update_current_span", output=result["answer"],
+       metadata={"model": model, "steps": result["steps"], "tokens_in": tokens_in, "tokens_out": tokens_out,
                  "seconds": result["seconds"], "tools_used": tools_used, "error": result["error"]})
     return result
 
@@ -219,6 +241,7 @@ if __name__ == "__main__":
     if a.no_trace:
         TRACING = False
     print(f"[trace] Langfuse tracing {'ON -> ' + os.getenv('LANGFUSE_HOST', '') if TRACING else 'off'}", flush=True)
-    r = run_agent(" ".join(a.question), model=a.model, max_steps=a.max_steps, ctx=a.ctx, max_out=a.max_out)
+    with with_tags([a.model]):
+        r = run_agent(" ".join(a.question), model=a.model, max_steps=a.max_steps, ctx=a.ctx, max_out=a.max_out)
     flush()
     sys.exit(0 if r["answer"] is not None else 1)

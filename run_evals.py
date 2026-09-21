@@ -21,7 +21,7 @@ import re
 import unicodedata
 from pathlib import Path
 
-from agent import run_agent, flush
+from agent import run_agent, flush, with_tags
 
 
 def norm(s: str) -> str:
@@ -80,8 +80,10 @@ def main():
         w.writeheader()
         for q in questions:
             print(f"\n=== Q{q['id']} [{q['category']}] {q['question']}", flush=True)
-            r = run_agent(q["question"], model=a.model, max_steps=a.max_steps, ctx=a.ctx, quiet=True,
-                          temperature=a.temperature, tags=[f"q{q['id']}", q["category"], "eval"])
+            qtags = [a.model, f"q{q['id']}", q["category"], "eval"]
+            with with_tags(qtags):
+                r = run_agent(q["question"], model=a.model, max_steps=a.max_steps, ctx=a.ctx, quiet=True,
+                              temperature=a.temperature, tags=qtags)
             ok, notes = auto_check(q, r)
             passed += ok
             tot_tokens += r["tokens_in"] + r["tokens_out"]
