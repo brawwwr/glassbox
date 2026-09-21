@@ -1,0 +1,19 @@
+run               model        steps  wall s  model s  tool s model%  tok in tok out    est $  question
+20260921-095016   qwen3:14b        3     5.7      5.7   0.002   100%    3717     231  0.00088  What are my four VLANs and their subnets?
+20260921-095021   qwen3:14b        3     5.6      5.6   0.002   100%    3556     228  0.00085  What did I say about backups in August?
+20260921-095027   qwen3:14b        3     2.0      2.0   0.004   100%    4120      60  0.00086  How did my desktop thermals change between Au
+20260921-095029   qwen3:14b        3     1.4      1.4   0.003    99%    2524      48  0.00053  What did I write about my kitchen renovation?
+20260921-095030   qwen3:14b        3     5.9      5.9   0.003   100%    3671     245  0.00088  Summarize my notes from the vendor meeting ab
+20260921-104734   qwen3:14b        3     9.9      9.9   0.002   100%    3717     231  0.00088  What are my four VLANs and their subnets?
+20260921-104744   qwen3:14b        3     5.6      5.6   0.002   100%    3556     228  0.00085  What did I say about backups in August?
+20260921-104749   qwen3:14b        4     5.9      5.9   0.004   100%    6266     227  0.00139  How did my desktop thermals change between Au
+20260921-104755   qwen3:14b        3     1.3      1.3   0.003   100%    2524      48  0.00053  What did I write about my kitchen renovation?
+20260921-104757   qwen3:14b        3     5.9      5.9   0.004   100%    3671     240  0.00088  Summarize my notes from the vendor meeting ab
+20260921-110044   qwen3:14b        3     6.0      6.0   0.002   100%    2961      79  0.00064  what hydration did sourdough attempt 3 use
+20260921-110619   qwen3:14b        3     2.2      2.2   0.002   100%    2961      79  0.00064  what hydration did sourdough attempt 3 use
+------------------------------------------------------------------------------------------------------------------------
+TOTAL                                   57.4     57.4   0.033   100%   43244    1944  0.00982
+
+Model time 99.9% of wall time; tools 0.06%; the rest is Python/HTTP overhead. Estimated hosted cost for these 12 runs: $0.0098 ($0.00082 per question).
+
+(Langfuse API cross-check skipped: NotFoundError: headers: {'x-robots-tag': 'noindex', 'x-content-type-options': 'nosniff', 'refer)
