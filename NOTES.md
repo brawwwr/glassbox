@@ -282,5 +282,42 @@ the q12 trace, so there is one picture of structure and one of time.
 
 ---
 
+## Interlude — ecosystem check and challenger bench (24 Sep 2026)
+
+Nine days after the plan was written, a scan of the Ollama library, Hugging Face and GitHub (`research/scan-2026-09-24.md`,
+assessment in `research/assessment-2026-09-24.md`) found: no newer 14B-class Qwen on Ollama (3.6/3.8 are 27B dense or 35B MoE,
+which spill on 12 GB), several new models that *do* fit the card, and **major version bumps** in four of the plan's tools
+(TransformerLens 4.0.0 on 21 Sep, transformers 5.x, MCP SDK 2.x, Gradio 6.x). CircuitsVis is unmaintained.
+
+### Five challengers, 20 questions each, temperature 0, traced (`scratch/05_challengers.sh`)
+
+| model | pass | tokens / q | s / q | Q12 (two notes) | verdict |
+|---|---|---|---|---|---|
+| **gemma4:12b** | **20/20** | 3,385 | 4.9 | pass (5 steps, 8.5k tok) | ~7.5 GB; fits with a 16k context. **New working model for Phases 5–8.** |
+| **granite4.1:8b** | **20/20** | 3,746 | 3.2 | pass (6 steps, 11.1k tok) | 5.3 GB; fastest passer; IBM/enterprise story. Fast comparison model. |
+| lfm2.5:8b | 18/20 | 4,075 | 2.7 | fail | fastest of all — and the **first model to fall for a decoy**: on "backups in August" it folded the *camping trip* backup plan into the answer (campsite, state park). Fast and confidently wrong. Kept on disk as the cautionary example. |
+| ornith-1.5:9b | crashed after 9 Qs | | | | `CUDA error: invalid argument` — Ollama 0.34.2 runner vs new architecture. Retry on 0.34.4. |
+| nemotron-3.5-lightning | crashed at load | | | | `device kernel image is invalid` — kernels not built for this GPU in this Ollama build. Retry on 0.34.4. |
+
+Reference: qwen3:14b scored 18–20/20 across runs at ~4,100 tokens and 5–6 s per question, and spills above 8k context.
+gemma4:12b matches its best score with 20% fewer tokens and no spill; granite4.1:8b does the same at 60% of the speed cost.
+
+### Lineup going forward
+- **Working model (Phases 5–8): gemma4:12b** — pending a bench.py speed/fit run and a full 20-question temp-0 run of qwen3:14b for a like-for-like comparison.
+- **Baseline / continuity: qwen3:14b** — all Phase 1–3 numbers are on it; stays as the comparison.
+- **Fast comparison: granite4.1:8b.** **Different lineage: gpt-oss:20b.** **MoE reference: qwen3:30b-a3b** (nemotron-3.5-lightning if it runs on 0.34.4).
+- **Cautionary example: lfm2.5:8b.** **Judge candidate for Phase 8: granite4.1-guardian** (not yet pulled).
+
+### Lessons
+- The eval harness paid for itself: five new models assessed in ~25 minutes of unattended runtime, with the same 20 questions
+  and temperature 0, so the numbers are comparable to everything before.
+- "Fits the card" is now a *choice*, not a constraint: three 20/20-capable models fit in 12 GB with room to spare. The Phase 1
+  cliff finding decides which to prefer — the one that fits with the longest context.
+- Brand-new architectures crash at the runner level before any of our code runs. A model's tag on the library page is not a
+  guarantee it runs on a given card and Ollama version. Two of five failed that way.
+- Speed is not accuracy: the fastest model was the one that believed the decoy.
+
+---
+
 ## Phase 4 — micro lens: TransformerLens
-(pending)
+(pending — read TransformerLens 4.0 and transformers 5 release notes first; matplotlib, not CircuitsVis)
