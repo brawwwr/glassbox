@@ -1,0 +1,92 @@
+== nemotron-3.5-lightning  (Thu Sep 24 14:34:27 PDT 2026)
+--- A. plain run
+   A FAILED
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- B. python client, tools, num_ctx 8192
+Traceback (most recent call last):
+  File "<stdin>", line 6, in <module>
+  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/ollama/_client.py", line 387, in chat
+    return self._request(
+           ^^^^^^^^^^^^^^
+  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/ollama/_client.py", line 199, in _request
+    return cls(**self._request_raw(*args, **kwargs).json())
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/ollama/_client.py", line 143, in _request_raw
+    raise ResponseError(e.response.text, e.response.status_code) from None
+ollama._types.ResponseError: llama-server process has terminated: exit status 0xc0000409: The system detected an overrun of a stack-based buffer in this application. This overrun could potentially allow a malicious user to gain control of this application.: CUDA error: device kernel image is invalid (status code: 500)
+   B FAILED
+--- C. python client, tools, CPU only (num_gpu=0)
+reply:  | tool_calls: []
+   C ok
+--- D. python client, tools, GPU, num_ctx 4096
+reply: <tool_call>
+<function=search_notes | tool_calls: []
+   D ok
+--- server.log: last 40 lines mentioning error/CUDA/kernel/arch/library
+common_memory_breakdown_print: |   - CUDA0 (RTX 4070)   | 12281 = 11106 + ( 1119 =     0 +       0 +    1119) +          55 |
+common_memory_breakdown_print: | memory breakdown [MiB] | total    free     self   model   context   compute    unaccounted |
+common_memory_breakdown_print: |   - CUDA0 (RTX 4070)   | 12281 = 10962 + ( 2679 =  1405 +     166 +    1108) +       -1360 |
+common_params_fit_impl:   - CUDA0 (NVIDIA GeForce RTX 4070): 54 layers,   2714 MiB used,   8247 MiB free
+common_memory_breakdown_print: | memory breakdown [MiB] | total    free     self   model   context   compute    unaccounted |
+common_memory_breakdown_print: |   - CUDA0 (RTX 4070)   | 12281 = 10962 + (24288 = 24014 +     166 +     107) +      -22968 |
+common_memory_breakdown_print: | memory breakdown [MiB] | total    free     self   model   context   compute    unaccounted |
+common_memory_breakdown_print: |   - CUDA0 (RTX 4070)   | 12281 = 10962 + (10288 =  9017 +     166 +    1104) +       -8969 |
+common_memory_breakdown_print: | memory breakdown [MiB] | total    free     self   model   context   compute    unaccounted |
+common_memory_breakdown_print: |   - CUDA0 (RTX 4070)   | 12281 = 10962 + ( 9223 =  7951 +     166 +    1104) +       -7903 |
+common_memory_breakdown_print: | memory breakdown [MiB] | total    free     self   model   context   compute    unaccounted |
+common_memory_breakdown_print: |   - CUDA0 (RTX 4070)   | 12281 = 10962 + ( 9630 =  8359 +     166 +    1104) +       -8310 |
+common_memory_breakdown_print: | memory breakdown [MiB] | total    free     self   model   context   compute    unaccounted |
+common_memory_breakdown_print: |   - CUDA0 (RTX 4070)   | 12281 = 10962 + ( 9631 =  8360 +     166 +    1104) +       -8312 |
+common_params_fit_impl:   - CUDA0 (NVIDIA GeForce RTX 4070): 54 layers (37 overflowing),   9666 MiB used,   1295 MiB free
+llama_model_loader: - kv   0:                       general.architecture str              = nemotron_h_moe
+llama_model_loader: - kv  21:             nemotron_h_moe.ssm.conv_kernel u32              = 4
+llama_prepare_model_devices: using device CUDA0 (NVIDIA GeForce RTX 4070) (0000:01:00.0) - 11106 MiB free
+print_info: arch                  = nemotron_h_moe
+print_info: ssm_d_conv            = 4
+print_info: ssm_d_inner           = 4096
+print_info: ssm_d_state           = 128
+print_info: ssm_dt_rank           = 64
+print_info: ssm_n_group           = 8
+print_info: ssm_dt_b_c_rms        = 0
+load_tensors:        CUDA0 model buffer size =  8360.35 MiB
+load_tensors:    CUDA_Host model buffer size = 15884.80 MiB
+llama_context:  CUDA_Host  output buffer size =     0.50 MiB
+llama_kv_cache:      CUDA0 KV buffer size =    24.00 MiB
+llama_memory_recurrent:      CUDA0 RS buffer size =   142.85 MiB
+sched_reserve:      CUDA0 compute buffer size =  1104.45 MiB
+sched_reserve:  CUDA_Host compute buffer size =    14.51 MiB
+llama_context:  CUDA_Host  output buffer size =     0.50 MiB
+llama_kv_cache:      CUDA0 KV buffer size =     4.00 MiB
+sched_reserve:      CUDA0 compute buffer size =    30.51 MiB
+sched_reserve:  CUDA_Host compute buffer size =    14.51 MiB
+sched_reserve:      CUDA0 compute buffer size =    30.51 MiB
+sched_reserve:  CUDA_Host compute buffer size =    14.51 MiB
+time=2026-09-24T14:38:35.495-07:00 level=INFO source=images.go:383 msg="template selection" model=registry.ollama.ai/library/nemotron-3.5-lightning:latest selected=renderer_parser renderer=nemotron-3.5-nano parser=nemotron-3.5-nano go_template="[completion tools thinking]" chat_template="[tools thinking completion]" harmony=null renderer_parser="[completion tools thinking]"
+time=2026-09-24T14:38:35.495-07:00 level=INFO source=sched.go:733 msg="loaded runners" count=1
+--- model info
+  Model
+    architecture        nemotron_h_moe    
+    parameters          32.9B             
+    context length      1048576           
+    embedding length    2688              
+    quantization        Q4_K_M            
+    requires            0.32.9            
+
+  Capabilities
+    completion     
+    tools          
+    thinking       
+        levels     false, true, medium    
+        default    true                   
+
+  Parameters
+    draft_num_predict    2       
+    temperature          1       
+    top_p                0.95    
+
+  License
+    NVIDIA Open Model License Agreement    
+    Last Modified: October 24, 2025        
+    ...                                    
+
+

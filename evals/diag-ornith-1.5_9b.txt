@@ -1,0 +1,75 @@
+== ornith-1.5:9b  (Thu Sep 24 14:30:35 PDT 2026)
+--- A. plain run
+   A FAILED
+NAME    ID    SIZE    PROCESSOR    CONTEXT    UNTIL 
+--- B. python client, tools, num_ctx 8192
+reply:  | tool_calls: ['search_notes']
+   B ok
+--- C. python client, tools, CPU only (num_gpu=0)
+reply:  | tool_calls: []
+   C ok
+--- D. python client, tools, GPU, num_ctx 4096
+reply:  | tool_calls: ['search_notes']
+   D ok
+--- server.log: last 40 lines mentioning error/CUDA/kernel/arch/library
+print_info: ssm_d_inner           = 4096
+print_info: ssm_d_state           = 128
+print_info: ssm_dt_rank           = 32
+print_info: ssm_n_group           = 16
+print_info: ssm_dt_b_c_rms        = 0
+sched_reserve:        CPU compute buffer size =   208.04 MiB
+reserve_compute_meta:        CPU compute buffer size =   248.10 MiB
+reserve_compute_meta: graph splits = 1, nodes = 823
+time=2026-09-24T14:34:04.572-07:00 level=INFO source=images.go:383 msg="template selection" model=registry.ollama.ai/library/ornith-1.5:9b selected=gguf_chat_template renderer="" parser="" go_template=null chat_template="[tools thinking completion vision]" harmony=null renderer_parser=null
+time=2026-09-24T14:34:04.572-07:00 level=INFO source=sched.go:733 msg="loaded runners" count=1
+time=2026-09-24T14:34:22.611-07:00 level=INFO source=sched.go:1152 msg="disabling mmap for llama-server load by default" model=F:\ollama\models\blobs\sha256-852922174ee4f76621df26105333f1dfe2171cdfb60ebe5a4b013836681a8a77 reason=windows_cuda
+time=2026-09-24T14:34:22.619-07:00 level=INFO source=sched.go:625 msg="gpu memory" id=0 library=CUDA available="10.4 GiB" free="10.8 GiB" minimum="457.0 MiB" overhead="0 B"
+time=2026-09-24T14:34:22.619-07:00 level=INFO source=llama_server.go:1362 msg="waiting for llama-server to become available" status="llm server error"
+cmn  common_param:   - CUDA0   : NVIDIA GeForce RTX 4070 (12281 MiB, 11106 MiB free)
+cmn  common_param: system_info: n_threads = 16 (n_threads_batch = 16) / 32 | CPU : SSE3 = 1 | SSSE3 = 1 | AVX = 1 | AVX_VNNI = 1 | AVX2 = 1 | F16C = 1 | FMA = 1 | BMI2 = 1 | LLAMAFILE = 1 | OPENMP = 1 | REPACK = 1 | CUDA : ARCHS = 750,800,860,890,1000,1200 | USE_GRAPHS = 1 | FA_QUANTS = q4_0-q4_0,q8_0-q8_0,f16-f16,bf16-bf16 | 
+common_memory_breakdown_print: | memory breakdown [MiB] | total    free    self   model   context   compute    unaccounted |
+common_memory_breakdown_print: |   - CUDA0 (RTX 4070)   | 12281 = 11054 + (5082 =  4812 +     178 +      92) +       -3855 |
+llama_model_loader: - kv   0:                       general.architecture str              = qwen35
+llama_model_loader: - kv  17:                     qwen35.ssm.conv_kernel u32              = 4
+llama_prepare_model_devices: using device CUDA0 (NVIDIA GeForce RTX 4070) (0000:01:00.0) - 11106 MiB free
+print_info: arch                  = qwen35
+print_info: ssm_d_conv            = 4
+print_info: ssm_d_inner           = 4096
+print_info: ssm_d_state           = 128
+print_info: ssm_dt_rank           = 32
+print_info: ssm_n_group           = 16
+print_info: ssm_dt_b_c_rms        = 0
+load_tensors:        CUDA0 model buffer size =  4812.25 MiB
+load_tensors:    CUDA_Host model buffer size =   545.63 MiB
+llama_context:  CUDA_Host  output buffer size =     0.95 MiB
+llama_kv_cache:      CUDA0 KV buffer size =   128.00 MiB
+llama_memory_recurrent:      CUDA0 RS buffer size =    50.25 MiB
+sched_reserve:      CUDA0 compute buffer size =    92.02 MiB
+sched_reserve:  CUDA_Host compute buffer size =    20.02 MiB
+clip_ctx: CLIP using CUDA0 backend
+reserve_compute_meta:      CUDA0 compute buffer size =   248.10 MiB
+reserve_compute_meta:        CPU compute buffer size =    24.93 MiB
+reserve_compute_meta: graph splits = 1, nodes = 823
+time=2026-09-24T14:34:26.130-07:00 level=INFO source=images.go:383 msg="template selection" model=registry.ollama.ai/library/ornith-1.5:9b selected=gguf_chat_template renderer="" parser="" go_template=null chat_template="[tools thinking completion vision]" harmony=null renderer_parser=null
+time=2026-09-24T14:34:26.130-07:00 level=INFO source=sched.go:733 msg="loaded runners" count=1
+--- model info
+  Model
+    architecture        qwen35    
+    parameters          9.0B      
+    context length      262144    
+    embedding length    4096      
+    quantization        Q4_K_M    
+
+  Capabilities
+    tools         
+    thinking      
+    completion    
+    vision        
+
+  Projector
+    architecture        clip       
+    parameters          456.01M    
+    embedding length    1152       
+    dimensions          4096       
+
+
