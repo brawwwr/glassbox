@@ -147,7 +147,18 @@ summary = {"model": a.model, "question": a.question, "tag": a.tag, "verdict": ve
            "mean_share_last4": {r: sum(shares[r][-4:]) / 4 for r in reg_names},
            "mean_share_all": {r: sum(shares[r]) / L for r in reg_names},
            "density_per_100tok_all": {r: sum(density[r]) / L for r in reg_names}}
+# which specific prompt tokens get the most attention (mean over heads, sink excluded), last 4 layers and overall
+toks = tok.convert_ids_to_tokens(ids[0].tolist())
+def top_tokens(vec, k=12):
+    v = vec.clone(); v[0] = 0                      # drop the sink
+    idx = torch.topk(v, k).indices.tolist()
+    return [{"pos": i, "token": toks[i].replace("Ġ", " ").replace("Ċ", "\\n"), "region": regions[i], "attn": round(float(v[i]), 4)} for i in idx]
+summary["top_tokens_last4"] = top_tokens(rows[-4:].mean(0).mean(0))
+summary["top_tokens_all"] = top_tokens(rows.mean(0).mean(0))
 Path(f"research/phase4-{a.tag}.json").write_text(json.dumps(summary, indent=1))
+print("\ntop attended prompt tokens (sink excluded), mean of last 4 layers:")
+for t_ in summary["top_tokens_last4"]:
+    print(f"  pos {t_['pos']:4}  {t_['region']:9} {t_['attn']:.4f}  {t_['token']!r}")
 print("\nattention from the decision position (mean over heads):")
 print(f"  {'region':9} {'tokens':>6} {'share last4':>12} {'share all':>10} {'per 100 tok':>12}")
 for r in reg_names:

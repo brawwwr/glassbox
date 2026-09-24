@@ -380,5 +380,62 @@ catches prompt injections found along the way.
 
 ---
 
-## Phase 4 — micro lens: TransformerLens
-(pending — read TransformerLens 4.0 and transformers 5 release notes first; matplotlib, not CircuitsVis)
+## Phase 4 — micro lens (started 24 Sep 2026)
+
+Tooling reality check first (release notes fetched to `research/docs/`): **TransformerLens 4.0 (21 Sep) removed
+`HookedTransformer.from_pretrained`**, the API the plan was written around. The replacement is `TransformerBridge.boot_transformers(name)`,
+which wraps any Hugging Face model and supports Qwen3. transformers 5.17: nothing breaking for us (`torch_dtype` → `dtype`).
+CircuitsVis: no release since 2024 → matplotlib. Step 1 therefore uses plain transformers (as the plan suggested); step 2 uses the Bridge.
+
+Proxy model: **Qwen/Qwen3-1.7B** (28 layers, 16 heads, 8 KV heads, bf16 ≈ 3.4 GB). Its chat template renders tool schemas and has
+`<tool_call>` as a single token, so "the decision" is one measurable next-token prediction.
+
+### Step 1 — does the small model make the same decision, and where does it look? (`scratch/04_replay.py`)
+
+The script renders **exactly the agent's prompt** (SYSTEM + the three TOOLS schemas + question) through the model's own chat template —
+what Ollama does server-side — then greedy-generates, then takes one forward pass with attention outputs and reads the attention from the
+**decision position** (the token that predicts the first generated token) back to every prompt token, grouped by region.
+
+Prompt: 848 tokens = sink 1 · system 330 · tools 417 · question 11 · template 89.
+
+| question | first generated tokens | decision |
+|---|---|---|
+| "What are my four VLANs and their subnets?" | `<tool_call>{"name": "search_notes", "arguments": {"query": "VLAN"}}</tool_call>` | tool call as **token #1** |
+| "what is 17 times 23?" | `271` | direct answer (wrong — it is 391) |
+
+**The 1.7B makes the same decision the 14B does**, on the first token, with a well-formed call. The proxy is valid for *behaviour*.
+It is not valid for *competence*: 17 × 23 = 271 is a 1.7B arithmetic error the 14B would not make. Keep the two apart.
+
+Attention from the decision position (mean over heads; `share all` = mean over 28 layers; density = share per 100 tokens of region):
+
+| region | tokens | tool: share all | tool: per 100 tok | no-tool: share all | no-tool: per 100 tok |
+|---|---|---|---|---|---|
+| sink (token 0) | 1 | **0.452** | — | **0.447** | — |
+| system prompt | 330 | 0.088 | 0.027 | 0.106 | 0.032 |
+| tool schemas | 417 | 0.083 | 0.020 | 0.070 | 0.017 |
+| question | 11 | 0.022 | 0.198 | 0.043 | **0.431** |
+| template | 89 | 0.355 | 0.399 | 0.334 | 0.375 |
+
+What this says:
+1. **The attention sink dominates.** From layer 3 on, 45–79% of the decision position's attention goes to token 0 — identical in both
+   cases, so it carries no information. Heads with nothing to look at park there. Subtract it before reading anything else.
+2. **Structure beats content.** After the sink, most attention lands on the 89 template tokens (role markers, the tools header, the
+   `<|im_start|>assistant` prompt right before the decision). The 330-token system prompt and 417-token schema block get ~8–10% each.
+3. **The question is read twice as hard when answering directly** (0.43 vs 0.20 per 100 tokens): to produce "271" the model has to read
+   "17" and "23", and the per-layer curve shows it doing so in layers 14–20. When calling a tool, the question is read hardest in layers
+   0–2 and then largely dropped — consistent with classifying the question *type* early and not needing its content.
+4. **Specific heads look at the specific tool.** In the tool case, layers 16–19 give the schemas 23% / 18% / 8% / 16% (vs 18% / 10% / 6% / 6%
+   without a tool), and the head plot for layers 24–26 shows bright columns at positions ~360 (start of the tools block) and ~415 (inside
+   the `search_notes` schema). A few heads are looking at the tool it is about to call.
+5. **Honest limit:** at the region level the two cases look more alike than different. Attention shares are a weak instrument for *why*;
+   the signal is in a handful of heads and tokens. This is the argument for step 2 (logit lens: at which layer does the prediction
+   *become* `<tool_call>`?), which locates the decision in depth rather than in attention.
+
+Figures: `screenshots/phase4-attn-{tool,notool}-regions.png` (stacked shares + size-adjusted density by layer),
+`screenshots/phase4-attn-{tool,notool}-heads.png` (last 4 layers, heads × 848 prompt positions, regions banded). Data: `research/phase4-*.json`.
+
+Method notes worth keeping: measure at the position that *predicts* the decision token, not at the token itself (the first version got
+this wrong and saw 63% self-attention at layer 0); find the tools block with the *last* `<tools>` because the template mentions
+`<tools></tools>` in a sentence first; split the sink out as its own region or it hides everything.
+
+### Step 2 — logit lens on TransformerLens 4 (pending: `scratch/04b_logit_lens.py`)
