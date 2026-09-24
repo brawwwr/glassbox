@@ -216,5 +216,153 @@
   "tools": 0.019927180900853273,
   "question": 0.19838502033395908,
   "template": 0.3986746897953854
- }
+ },
+ "top_tokens_last4": [
+  {
+   "pos": 800,
+   "token": "<tool_call>",
+   "region": "template",
+   "attn": 0.0798
+  },
+  {
+   "pos": 847,
+   "token": "\\n\\n",
+   "region": "template",
+   "attn": 0.0619
+  },
+  {
+   "pos": 805,
+   "token": "<tool_call>",
+   "region": "template",
+   "attn": 0.0228
+  },
+  {
+   "pos": 845,
+   "token": "\\n\\n",
+   "region": "template",
+   "attn": 0.0222
+  },
+  {
+   "pos": 846,
+   "token": "</think>",
+   "region": "template",
+   "attn": 0.013
+  },
+  {
+   "pos": 842,
+   "token": "assistant",
+   "region": "template",
+   "attn": 0.0084
+  },
+  {
+   "pos": 840,
+   "token": "\\n",
+   "region": "template",
+   "attn": 0.0066
+  },
+  {
+   "pos": 359,
+   "token": "tools",
+   "region": "template",
+   "attn": 0.005
+  },
+  {
+   "pos": 843,
+   "token": "\\n",
+   "region": "template",
+   "attn": 0.0041
+  },
+  {
+   "pos": 807,
+   "token": "{\"",
+   "region": "template",
+   "attn": 0.0036
+  },
+  {
+   "pos": 825,
+   "token": "<|im_start|>",
+   "region": "template",
+   "attn": 0.0029
+  },
+  {
+   "pos": 1,
+   "token": "system",
+   "region": "template",
+   "attn": 0.0028
+  }
+ ],
+ "top_tokens_all": [
+  {
+   "pos": 847,
+   "token": "\\n\\n",
+   "region": "template",
+   "attn": 0.1025
+  },
+  {
+   "pos": 845,
+   "token": "\\n\\n",
+   "region": "template",
+   "attn": 0.0601
+  },
+  {
+   "pos": 846,
+   "token": "</think>",
+   "region": "template",
+   "attn": 0.0358
+  },
+  {
+   "pos": 800,
+   "token": "<tool_call>",
+   "region": "template",
+   "attn": 0.0162
+  },
+  {
+   "pos": 840,
+   "token": "\\n",
+   "region": "template",
+   "attn": 0.0133
+  },
+  {
+   "pos": 843,
+   "token": "\\n",
+   "region": "template",
+   "attn": 0.0125
+  },
+  {
+   "pos": 842,
+   "token": "assistant",
+   "region": "template",
+   "attn": 0.0079
+  },
+  {
+   "pos": 805,
+   "token": "<tool_call>",
+   "region": "template",
+   "attn": 0.0075
+  },
+  {
+   "pos": 806,
+   "token": "\\n",
+   "region": "template",
+   "attn": 0.0073
+  },
+  {
+   "pos": 827,
+   "token": "\\n",
+   "region": "template",
+   "attn": 0.0058
+  },
+  {
+   "pos": 828,
+   "token": "What",
+   "region": "question",
+   "attn": 0.0054
+  },
+  {
+   "pos": 807,
+   "token": "{\"",
+   "region": "template",
+   "attn": 0.0051
+  }
+ ]
 }
