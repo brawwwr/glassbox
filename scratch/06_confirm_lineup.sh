@@ -20,7 +20,7 @@ cp bench.py /tmp/bench.py.bak
 python3 - << 'PY'
 import re
 s = open("bench.py").read()
-s = re.sub(r"MODELS = \[.*?\]", 'MODELS = ["qwen3:14b", "gemma4:12b", "granite4.1:8b", "lfm2.5:8b"]', s, count=1, flags=re.S)
+s = re.sub(r"MODELS = \[.*?\]", 'MODELS = ["qwen3:14b", "gemma4:12b", "granite4.1:8b", "ornith-1.5:9b", "lfm2.5:8b"]', s, count=1, flags=re.S)
 open("bench.py", "w").write(s)
 PY
 uv run bench.py > evals/lineup-bench.log 2>&1
