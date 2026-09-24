@@ -1,0 +1,107 @@
+run               model        steps  wall s  model s  tool s model%  tok in tok out    est $  question
+20260919-115449   ornith:9b        2     1.7      1.7   0.002    99%    2457      87  0.00027  What is my log retention for the Pi-hole quer
+20260919-115451   ornith:9b        3     3.0      3.0   0.002   100%    4072     173  0.00046  Where did I decide secrets should go in Power
+20260919-115454   ornith:9b        2     1.2      1.2   0.002   100%    2173      57  0.00023  What hydration did sourdough attempt 3 use?
+20260919-115455   ornith:9b        3     4.0      4.0   0.001   100%    3803     241  0.00045  What is the Do-until gotcha I wrote about?
+20260919-115459   ornith:9b        3     4.3      4.2   0.002   100%    4166     258  0.00049  What did I say about backups in August?
+20260919-115503   ornith:9b        5     4.7      4.7   0.004   100%    9068     268  0.00099  How did my desktop thermals change between Au
+20260919-115508   ornith:9b        3     4.2      4.2   0.003   100%    3960     242  0.00047  What were my July focus items and did I finis
+20260919-115512   ornith:9b        1     0.5      0.5   0.000   100%     980      13  0.00010  What is 17 times 23?
+20260919-115513   ornith:9b        1     1.2      1.2   0.000   100%     984      63  0.00012  Explain what a mixture-of-experts model is in
+20260919-115514   ornith:9b        1     0.6      0.6   0.000   100%     978      22  0.00010  Write a haiku about a GPU.
+20260919-115515   ornith:9b        5     2.4      2.4   0.004   100%    5477     128  0.00059  What did I write about my kitchen renovation?
+20260919-115517   ornith:9b        3     1.6      1.7   0.002   101%    3619      79  0.00039  When did I replace the roof?
+20260919-115519   ornith:9b        3     3.9      3.9   0.002   100%    4095     227  0.00048  What did I write about VLANs and the sandwich
+20260919-115522   ornith:9b        3     4.4      4.4   0.002   100%    4284     256  0.00051  Summarize my notes from the vendor meeting ab
+20260921-092237   qwen3:14b        3    20.3     20.3   0.007   100%    3714     230  0.00088  what are my four vlans and their subnets
+20260921-094317   qwen3:14b        3    20.4     20.3   0.002   100%    3553     210  0.00084  what did i say about backups in august
+20260921-095016   qwen3:14b        3     5.7      5.7   0.002   100%    3717     231  0.00088  What are my four VLANs and their subnets?
+20260921-095021   qwen3:14b        3     5.6      5.6   0.002   100%    3556     228  0.00085  What did I say about backups in August?
+20260921-095027   qwen3:14b        3     2.0      2.0   0.004   100%    4120      60  0.00086  How did my desktop thermals change between Au
+20260921-095029   qwen3:14b        3     1.4      1.4   0.003    99%    2524      48  0.00053  What did I write about my kitchen renovation?
+20260921-095030   qwen3:14b        3     5.9      5.9   0.003   100%    3671     245  0.00088  Summarize my notes from the vendor meeting ab
+20260921-104734   qwen3:14b        3     9.9      9.9   0.002   100%    3717     231  0.00088  What are my four VLANs and their subnets?
+20260921-104744   qwen3:14b        3     5.6      5.6   0.002   100%    3556     228  0.00085  What did I say about backups in August?
+20260921-104749   qwen3:14b        4     5.9      5.9   0.004   100%    6266     227  0.00139  How did my desktop thermals change between Au
+20260921-104755   qwen3:14b        3     1.3      1.3   0.003   100%    2524      48  0.00053  What did I write about my kitchen renovation?
+20260921-104757   qwen3:14b        3     5.9      5.9   0.004   100%    3671     240  0.00088  Summarize my notes from the vendor meeting ab
+20260921-110044   qwen3:14b        3     6.0      6.0   0.002   100%    2961      79  0.00064  what hydration did sourdough attempt 3 use
+20260921-110619   qwen3:14b        3     2.2      2.2   0.002   100%    2961      79  0.00064  what hydration did sourdough attempt 3 use
+20260921-112214   ornith:9b        5    21.3     21.3   0.005   100%    9068     268  0.00099  How did my desktop thermals change between Au
+20260921-112338   gpt-oss:20b      6    34.6     34.6   0.013   100%   10471     341  0.00122  How did my desktop thermals change between Au
+20260924-131806   gemma4:12b       ?     0.0      0.0   0.000     0%       0       0  0.00000  What are my four VLANs and their subnets?
+20260924-134311   gemma4:12b       3    23.9     23.9   0.002   100%    3632     205  0.00000  What are my four VLANs and their subnets?
+20260924-134335   gemma4:12b       3     3.4      3.4   0.002   100%    3553      89  0.00000  How much did the 2 TB NVMe cost?
+20260924-134338   gemma4:12b       3     3.4      3.4   0.002   100%    3130      94  0.00000  What was the UPS runtime to 20% battery?
+20260924-134342   gemma4:12b       3     3.7      3.7   0.003   100%    3462     128  0.00000  Which three files did I restore in the August
+20260924-134345   gemma4:12b       3     3.8      3.8   0.002   100%    3507     112  0.00000  What did the second exhaust fan do to my GPU 
+20260924-134349   gemma4:12b       3     4.5      4.5   0.003   100%    3474     136  0.00000  Which Pi-hole blocklists am I using?
+20260924-134354   gemma4:12b       3     3.5      3.5   0.002   100%    3503      96  0.00000  What is my log retention for the Pi-hole quer
+20260924-134357   gemma4:12b       3     5.1      5.1   0.002   100%    3407     180  0.00000  Where did I decide secrets should go in Power
+20260924-134402   gemma4:12b       2     2.6      2.6   0.002   100%    1723      62  0.00000  What hydration did sourdough attempt 3 use?
+20260924-134405   gemma4:12b       3     5.5      5.5   0.002   100%    3084     222  0.00000  What is the Do-until gotcha I wrote about?
+20260924-134410   gemma4:12b       3     4.9      4.9   0.002   100%    3505     188  0.00000  What did I say about backups in August?
+20260924-134415   gemma4:12b       5     7.3      7.3   0.005   100%    8286     248  0.00000  How did my desktop thermals change between Au
+20260924-134423   gemma4:12b       4     7.1      7.1   0.003   100%    4828     241  0.00000  What were my July focus items and did I finis
+20260924-134430   gemma4:12b       1     1.1      1.1   0.000   100%     765      13  0.00000  What is 17 times 23?
+20260924-134431   gemma4:12b       1     1.8      1.8   0.000   100%     769      73  0.00000  Explain what a mixture-of-experts model is in
+20260924-134433   gemma4:12b       1     0.7      0.7   0.000   100%     763      20  0.00000  Write a haiku about a GPU.
+20260924-134434   gemma4:12b       4     2.6      2.6   0.004   100%    3295      78  0.00000  What did I write about my kitchen renovation?
+20260924-134436   gemma4:12b       4     2.7      2.7   0.005    99%    3279      79  0.00000  When did I replace the roof?
+20260924-134439   gemma4:12b       3     4.0      4.0   0.002   100%    3452     147  0.00000  What did I write about VLANs and the sandwich
+20260924-134443   gemma4:12b       3     6.9      6.9   0.002   100%    3608     257  0.00000  Summarize my notes from the vendor meeting ab
+20260924-134450   lfm2.5:8b        3     6.6      6.6   0.002   100%    3599     469  0.00000  What are my four VLANs and their subnets?
+20260924-134457   lfm2.5:8b        3     2.0      2.0   0.002   100%    3686     439  0.00000  How much did the 2 TB NVMe cost?
+20260924-134459   lfm2.5:8b        5     3.7      3.7   0.002    99%    6524     840  0.00000  What was the UPS runtime to 20% battery?
+20260924-134503   lfm2.5:8b        3     3.5      3.5   0.003   100%    3612     805  0.00000  Which three files did I restore in the August
+20260924-134506   lfm2.5:8b        5     4.4      4.4   0.004   100%    6841     988  0.00000  What did the second exhaust fan do to my GPU 
+20260924-134511   lfm2.5:8b        3     1.9      1.9   0.003   100%    3422     425  0.00000  Which Pi-hole blocklists am I using?
+20260924-134512   lfm2.5:8b        3     1.6      1.6   0.002    99%    3426     339  0.00000  What is my log retention for the Pi-hole quer
+20260924-134514   lfm2.5:8b        3     2.5      2.5   0.003   100%    3459     582  0.00000  Where did I decide secrets should go in Power
+20260924-134517   lfm2.5:8b        2     1.2      1.2   0.002   100%    1787     265  0.00000  What hydration did sourdough attempt 3 use?
+20260924-134518   lfm2.5:8b        3     2.7      2.7   0.003   100%    3236     645  0.00000  What is the Do-until gotcha I wrote about?
+20260924-134521   lfm2.5:8b        3     4.6      4.6   0.003   100%    3836    1086  0.00000  What did I say about backups in August?
+20260924-134525   lfm2.5:8b        4     2.7      2.7   0.006   100%    5820     562  0.00000  How did my desktop thermals change between Au
+20260924-134528   lfm2.5:8b        3     2.9      2.9   0.002   100%    3502     649  0.00000  What were my July focus items and did I finis
+20260924-134531   lfm2.5:8b        1     0.4      1.8   0.000   405%     740      89  0.00000  What is 17 times 23?
+20260924-134533   lfm2.5:8b        1     2.3      2.3   0.000   100%     740     559  0.00000  Write a haiku about a GPU.
+20260924-134535   lfm2.5:8b        4     3.1      3.1   0.005    99%    3625     719  0.00000  What did I write about my kitchen renovation?
+20260924-134538   lfm2.5:8b        4     2.2      2.2   0.004   100%    4434     488  0.00000  When did I replace the roof?
+20260924-134540   lfm2.5:8b        3     2.5      2.5   0.002   100%    3481     566  0.00000  What did I write about VLANs and the sandwich
+20260924-134543   lfm2.5:8b        3     2.5      2.5   0.004   100%    3606     555  0.00000  Summarize my notes from the vendor meeting ab
+20260924-134546   granite4.1:8b     3    15.0     15.0   0.002   100%    3593     156  0.00000  What are my four VLANs and their subnets?
+20260924-134601   granite4.1:8b     3     1.8      1.8   0.002    99%    3666     101  0.00000  How much did the 2 TB NVMe cost?
+20260924-134602   granite4.1:8b     3     1.4      1.4   0.002   100%    3419      83  0.00000  What was the UPS runtime to 20% battery?
+20260924-134604   granite4.1:8b     3     1.9      1.9   0.002    99%    3611     116  0.00000  Which three files did I restore in the August
+20260924-134606   granite4.1:8b     3     1.8      1.8   0.004   100%    3524     114  0.00000  What did the second exhaust fan do to my GPU 
+20260924-134608   granite4.1:8b     3     3.1      3.1   0.003   100%    3465     205  0.00000  Which Pi-hole blocklists am I using?
+20260924-134611   granite4.1:8b     3     1.6      1.6   0.003    99%    3494     100  0.00000  What is my log retention for the Pi-hole quer
+20260924-134612   granite4.1:8b     3     3.2      3.2   0.003   100%    3446     213  0.00000  Where did I decide secrets should go in Power
+20260924-134616   granite4.1:8b     3     1.6      1.6   0.003    99%    2997     102  0.00000  What hydration did sourdough attempt 3 use?
+20260924-134617   granite4.1:8b     3     4.6      4.6   0.002   100%    3227     321  0.00000  What is the Do-until gotcha I wrote about?
+20260924-134622   granite4.1:8b     3     3.7      3.7   0.002   100%    3528     243  0.00000  What did I say about backups in August?
+20260924-134625   granite4.1:8b     6     6.7      6.6   0.007   100%   10688     409  0.00000  How did my desktop thermals change between Au
+20260924-134632   granite4.1:8b     3     3.4      3.4   0.003   100%    3347     217  0.00000  What were my July focus items and did I finis
+20260924-134636   granite4.1:8b     1     0.3      1.6   0.000   526%     817      20  0.00000  What is 17 times 23?
+20260924-134637   granite4.1:8b     3     1.9      1.9   0.002   100%    3096     125  0.00000  Write a haiku about a GPU.
+20260924-134639   granite4.1:8b     4     1.7      1.7   0.004    99%    3563     113  0.00000  What did I write about my kitchen renovation?
+20260924-134641   granite4.1:8b     4     2.0      2.0   0.005   100%    4193     130  0.00000  When did I replace the roof?
+20260924-134643   granite4.1:8b     3     2.8      2.8   0.002   100%    3453     185  0.00000  What did I write about VLANs and the sandwich
+20260924-134646   granite4.1:8b     3     4.2      4.2   0.003   100%    3649     283  0.00000  Summarize my notes from the vendor meeting ab
+20260924-134650   ornith-1.5:9b     3    10.2     10.2   0.002   100%    4327     326  0.00000  What are my four VLANs and their subnets?
+20260924-134701   ornith-1.5:9b     3     2.8      2.8   0.002   100%    4360     161  0.00000  How much did the 2 TB NVMe cost?
+20260924-134703   ornith-1.5:9b     3     2.7      2.7   0.002   100%    3841     161  0.00000  What was the UPS runtime to 20% battery?
+20260924-134706   ornith-1.5:9b     3     3.3      3.3   0.002   100%    4179     200  0.00000  Which three files did I restore in the August
+20260924-134709   ornith-1.5:9b     3     5.3      5.3   0.006   100%    5376     332  0.00000  What did the second exhaust fan do to my GPU 
+20260924-134715   ornith-1.5:9b     3     3.1      3.1   0.002   100%    4140     192  0.00000  Which Pi-hole blocklists am I using?
+20260924-134718   ornith-1.5:9b     2     2.6      2.6   0.004   100%    2867     154  0.00000  What is my log retention for the Pi-hole quer
+20260924-134720   ornith-1.5:9b     3     3.9      3.9   0.002   100%    4124     245  0.00000  Where did I decide secrets should go in Power
+20260924-134724   ornith-1.5:9b     3     2.9      2.9   0.005   100%    3986     178  0.00000  What hydration did sourdough attempt 3 use?
+20260924-134727   ornith-1.5:9b     ?     0.7      0.7   0.002   100%       0       0  0.00000  What is the Do-until gotcha I wrote about?
+20260924-134732   nemotron-3.5-lightning     ?     0.0      0.0   0.000     0%       0       0  0.00000  What are my four VLANs and their subnets?
+------------------------------------------------------------------------------------------------------------------------
+TOTAL                                  444.3    446.6   0.266   101%  362543   24030  0.01938
+
+Model time 100.5% of wall time; tools 0.06%; the rest is Python/HTTP overhead. Estimated hosted cost for these 100 runs: $0.0194 ($0.00019 per question).
+
+(Langfuse API cross-check skipped: NotFoundError: headers: {'x-robots-tag': 'noindex', 'x-content-type-options': 'nosniff', 'refer)

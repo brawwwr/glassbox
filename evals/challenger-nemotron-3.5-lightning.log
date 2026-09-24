@@ -1,0 +1,34 @@
+
+=== Q1 [tool-single] What are my four VLANs and their subnets?
+Traceback (most recent call last):
+  File "/home/administrator/glassbox/run_evals.py", line 106, in <module>
+    main()
+  File "/home/administrator/glassbox/run_evals.py", line 85, in main
+    r = run_agent(q["question"], model=a.model, max_steps=a.max_steps, ctx=a.ctx, quiet=True,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/langfuse/_client/observe.py", line 423, in sync_wrapper
+    raise e
+  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/langfuse/_client/observe.py", line 407, in sync_wrapper
+    result = func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/administrator/glassbox/agent.py", line 198, in run_agent
+    resp = chat(model, messages, ctx, max_out, temperature)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/langfuse/_client/observe.py", line 423, in sync_wrapper
+    raise e
+  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/langfuse/_client/observe.py", line 407, in sync_wrapper
+    result = func(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/administrator/glassbox/agent.py", line 145, in chat
+    resp = ollama.chat(model=model, messages=messages, tools=TOOLS, options=opts, think=think_arg(model))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/ollama/_client.py", line 387, in chat
+    return self._request(
+           ^^^^^^^^^^^^^^
+  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/ollama/_client.py", line 199, in _request
+    return cls(**self._request_raw(*args, **kwargs).json())
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/ollama/_client.py", line 143, in _request_raw
+    raise ResponseError(e.response.text, e.response.status_code) from None
+ollama._types.ResponseError: llama-server process has terminated: exit status 0xc0000409: The system detected an overrun of a stack-based buffer in this application. This overrun could potentially allow a malicious user to gain control of this application.: CUDA error
+CUDA error: device kernel image is invalid (status code: 500)

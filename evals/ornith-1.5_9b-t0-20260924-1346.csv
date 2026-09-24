@@ -1,0 +1,58 @@
+id,category,question,answer,steps,tokens,seconds,tools_used,auto_pass,notes
+1,tool-single,What are my four VLANs and their subnets?,"Your four VLANs and their subnets:
+
+| VLAN | Name | Subnet | Purpose |
+|------|------|--------|---------|
+| 10 | trusted | 192.168.10.0/24 | laptops, desktop, NAS |
+| 20 | iot | 192.168.20.0/24 | thermostat, cameras, smart plugs |
+| 30 | guest | 192.168.30.0/24 | visitors; internet only |
+| 40 | lab | 192.168.40.0/24 | VMs, test boxes, anything you might break |
+
+Source: `2026-06-10-vlan-plan.md`
+
+Note: the plan also records that iot and guest can't initiate to trusted, lab can reach trusted on 445 (SMB) only, and Pi-hole on trusted serves DNS to everything.",3,4653,10.21,search_notes read_note,True,
+2,tool-single,How much did the 2 TB NVMe cost?,"The 2 TB NVMe cost **$149** (on sale). It's the same PCIe 4.0 model line as your existing 1 TB drive.
+
+Source: `2026-07-02-ssd-purchase.md`",3,4521,2.81,search_notes read_note,True,
+3,tool-single,What was the UPS runtime to 20% battery?,"The UPS runtime to 20% battery was **34 minutes**.
+
+Source: `2026-08-04-ups-runtime-test.md` (test run on 2026-08-04, with the NAS, switch, firewall, and Pi on the UPS).",3,4002,2.67,search_notes read_note,True,
+4,tool-single,Which three files did I restore in the August restore drill?,"In the August restore drill (2026-08-11), you restored these three files:
+
+1. **A 2019 photo**
+2. **A tax PDF from 2023**
+3. **The home network diagram**
+
+All three restored successfully with matching checksums. (Source: `2026-08-11-backup-restore-drill-august.md`)",3,4379,3.27,search_notes read_note,True,
+5,tool-single,What did the second exhaust fan do to my GPU temperature?,"The second exhaust fan dropped your GPU temperature from **71 °C to 67 °C** — a **4 °C reduction**.
+
+It was installed on 2026-09-14 (top rear), and you re-ran the same 30-minute stress test as in August. It also helped the CPU (82 → 76 °C) and the NVMe drive (64 → 59 °C). You noted the noise is slightly higher at full load but inaudible at idle, and decided it was ""good enough.""
+
+Source: `2026-09-14-second-exhaust-fan.md` (baseline was `2026-08-15-desktop-thermals.md`).",3,5708,5.34,search_notes search_notes read_note read_note,True,
+6,tool-single,Which Pi-hole blocklists am I using?,"You're using this blocklist set (from `2026-07-12-pihole-blocklists.md`):
+
+- **StevenBlack unified** (base)
+- **OISD small**
+- A short **personal allowlist**: the smart-TV telemetry domain (which also serves the app store) and the thermostat's cloud endpoint.
+
+This set blocks roughly **18–22%** of queries without breaking your TV apps.",3,4332,3.11,search_notes read_note,True,
+7,tool-single,What is my log retention for the Pi-hole query log?,"Your log retention for the Pi-hole query log is **7 days**.
+
+This is from your log retention policy note:
+
+> ""Pi-hole query log: 7 days. Longer is creepy and not useful.""
+> — `2026-08-25-log-retention-home.md`
+
+The policy gives personally identifying data (like the query log and camera footage) the shortest retention window.",2,3021,2.59,search_notes search_notes,True,
+8,tool-single,Where did I decide secrets should go in Power Automate flows?,"You decided this in **`2026-08-20-power-automate-secrets.md`** (titled ""Where secrets go in flows"").
+
+Your rule: **never in the flow definition**, with options ranked:
+
+1. **Connection references** — the credential lives in the connection, not the flow. Your best default.
+2. **Environment variables of type secret** backed by a key vault — for API keys the connector can't hold.
+3. Anything else is a smell.
+
+You also noted: turn on **""secure inputs/outputs""** on actions that touch tokens, otherwise they show up in run history in plain text for anyone with view access.",3,4369,3.91,search_notes read_note,True,
+9,tool-single,What hydration did sourdough attempt 3 use?,"Sourdough attempt 3 used **78% hydration** (down from 82% in attempt 2).
+
+Source: `2026-06-21-sourdough-attempt-3.md`",3,4164,2.91,search_notes search_notes read_note,True,

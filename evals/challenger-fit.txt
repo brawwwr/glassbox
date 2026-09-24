@@ -1,0 +1,5 @@
+-- gemma4:12b
+-- lfm2.5:8b
+-- granite4.1:8b
+-- ornith-1.5:9b
+-- nemotron-3.5-lightning
