@@ -69,15 +69,16 @@ n_prompt = ids.shape[1]
 print(f"prompt: {len(text):,} chars, {n_prompt} tokens")
 
 # regions of the prompt, by character span → token indices
-def span(start_marker, end_marker, from_pos=0):
-    s = text.find(start_marker, from_pos); e = text.find(end_marker, s + len(start_marker)) if s >= 0 else -1
-    return (s, e + len(end_marker)) if s >= 0 and e >= 0 else None
-
 q_start = text.rfind(a.question); q_span = (q_start, q_start + len(a.question))
-tools_span = span("<tools>", "</tools>")
+# the template mentions "<tools></tools>" in a sentence BEFORE the real block, so take the LAST "<tools>" opener
+t_open = text.rfind("<tools>"); t_close = text.find("</tools>", t_open + 7) if t_open >= 0 else -1
+tools_span = (t_open, t_close + len("</tools>")) if t_open >= 0 and t_close >= 0 else None
 sys_start = text.find(SYSTEM[:40]); sys_span = (sys_start, sys_start + len(SYSTEM)) if sys_start >= 0 else None
 
+REG = ("sink", "system", "tools", "question", "template")
+
 def region_of(i):
+    if i == 0: return "sink"                          # first token: transformers park spare attention mass here
     cs, ce = offsets[i]
     mid = (cs + ce) / 2
     if q_span[0] <= mid < q_span[1]: return "question"
@@ -86,8 +87,9 @@ def region_of(i):
     return "template"
 
 regions = [region_of(i) for i in range(n_prompt)]
-counts = {r: regions.count(r) for r in ("system", "tools", "question", "template")}
+counts = {r: regions.count(r) for r in REG}
 print("prompt tokens by region:", counts)
+assert counts["tools"] > 50, "tools region looks wrong (expected a few hundred tokens of schema JSON)"
 
 # ---------------------------------------------------------------------------------------------
 # 2. load model, generate a few tokens greedily
@@ -108,19 +110,22 @@ print("\n--- generated ---\n" + new_text + "\n-----------------")
 
 tool_call_id = tok.convert_tokens_to_ids("<tool_call>")
 called = tool_call_id in new_ids
+# The DECISION is made at the position that PREDICTS the next token, i.e. one before it. If <tool_call> is the
+# first generated token, the decision position is the last prompt token — and that is also where the no-tool
+# model decides to answer directly, so the two cases are measured at the same place.
 if called:
-    k = new_ids.index(tool_call_id)                 # position of <tool_call> among generated tokens
-    decision_pos = n_prompt + k                     # absolute position of the decision token
+    k = new_ids.index(tool_call_id)                 # index of <tool_call> among generated tokens
+    decision_pos = n_prompt + k - 1                 # the token whose next-token prediction was <tool_call>
     verdict = f"<tool_call> emitted as generated token #{k + 1}"
 else:
-    decision_pos = n_prompt                         # first generated token: the decision NOT to call
+    decision_pos = n_prompt - 1                     # last prompt token: predicted a plain answer instead
     verdict = "no <tool_call> in the first tokens"
-print("verdict:", verdict)
+print("verdict:", verdict, f"| decision position = token {decision_pos} of {n_prompt} prompt tokens")
 
 # ---------------------------------------------------------------------------------------------
-# 3. one forward pass with attentions; attention FROM the decision token BACK to the prompt
+# 3. one forward pass with attentions; attention FROM the decision position BACK to the prompt
 # ---------------------------------------------------------------------------------------------
-seq = gen[:, : decision_pos + 1]                    # prompt + generated up to and including the decision token
+seq = gen[:, : decision_pos + 1]                    # everything up to and including the decision position
 with torch.no_grad():
     out = model(seq, output_attentions=True)
 attn = out.attentions                               # tuple(len=layers) of [1, heads, q, k]
@@ -130,23 +135,29 @@ rows = torch.stack([attn[l][0, :, decision_pos, :n_prompt].float().cpu() for l i
 del out; torch.cuda.empty_cache()
 
 # region shares per layer (averaged over heads)
-reg_names = ["system", "tools", "question", "template"]
+reg_names = list(REG)
 masks = {r: torch.tensor([x == r for x in regions]) for r in reg_names}
 shares = {r: [float(rows[l].mean(0)[masks[r]].sum()) for l in range(L)] for r in reg_names}
 gen_share = [float(1 - rows[l].mean(0).sum()) for l in range(L)]    # what went to generated tokens instead
+# per-token density: share / tokens — the fair comparison across regions of very different size
+density = {r: [shares[r][l] / max(counts[r], 1) * 100 for l in range(L)] for r in reg_names}
 summary = {"model": a.model, "question": a.question, "tag": a.tag, "verdict": verdict, "generated": new_text,
-           "prompt_tokens": n_prompt, "region_token_counts": counts, "layers": L,
+           "prompt_tokens": n_prompt, "decision_pos": decision_pos, "region_token_counts": counts, "layers": L,
            "share_by_layer": shares, "share_generated_by_layer": gen_share,
-           "mean_share_last4": {r: sum(shares[r][-4:]) / 4 for r in reg_names}}
+           "mean_share_last4": {r: sum(shares[r][-4:]) / 4 for r in reg_names},
+           "mean_share_all": {r: sum(shares[r]) / L for r in reg_names},
+           "density_per_100tok_all": {r: sum(density[r]) / L for r in reg_names}}
 Path(f"research/phase4-{a.tag}.json").write_text(json.dumps(summary, indent=1))
-print("\nattention from the decision token, mean of last 4 layers:")
+print("\nattention from the decision position (mean over heads):")
+print(f"  {'region':9} {'tokens':>6} {'share last4':>12} {'share all':>10} {'per 100 tok':>12}")
 for r in reg_names:
-    print(f"  {r:9} {summary['mean_share_last4'][r]:.3f}   ({counts[r]} tokens)")
+    print(f"  {r:9} {counts[r]:6} {summary['mean_share_last4'][r]:12.3f} {summary['mean_share_all'][r]:10.3f} "
+          f"{summary['density_per_100tok_all'][r]:12.3f}")
 
 # ---------------------------------------------------------------------------------------------
 # 4. figures
 # ---------------------------------------------------------------------------------------------
-colors = {"system": "#4e79a7", "tools": "#f28e2b", "question": "#e15759", "template": "#bab0ab"}
+colors = {"sink": "#000000", "system": "#4e79a7", "tools": "#f28e2b", "question": "#e15759", "template": "#bab0ab"}
 
 fig, axes = plt.subplots(a.layers, 1, figsize=(16, 2.2 * a.layers), sharex=True)
 for ax, l in zip(axes, range(L - a.layers, L)):
@@ -155,19 +166,25 @@ for ax, l in zip(axes, range(L - a.layers, L)):
     # region band along the bottom
     for i, r in enumerate(regions):
         ax.axvspan(i - 0.5, i + 0.5, ymin=0, ymax=0.06, color=colors[r], lw=0)
-axes[-1].set_xlabel("prompt token position   (band: blue=system  orange=tools  red=question  grey=template)")
-fig.suptitle(f"Attention from the decision token back to the prompt — {a.model}\n{verdict} | Q: {a.question}", fontsize=11)
+axes[-1].set_xlabel("prompt token position   (band: black=sink  blue=system  orange=tools  red=question  grey=template)")
+fig.suptitle(f"Attention from the decision position back to the prompt — {a.model}\n{verdict} | Q: {a.question}", fontsize=11)
 fig.tight_layout(); f1 = f"screenshots/phase4-attn-{a.tag}-heads.png"; fig.savefig(f1, dpi=110); plt.close(fig)
 
-fig, ax = plt.subplots(figsize=(12, 4.5))
+fig, (ax, ax2) = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
 bottom = [0.0] * L
 for r in reg_names:
     ax.bar(range(L), shares[r], bottom=bottom, color=colors[r], label=f"{r} ({counts[r]} tok)")
     bottom = [b + s for b, s in zip(bottom, shares[r])]
 ax.bar(range(L), gen_share, bottom=bottom, color="#59a14f", label="generated so far")
-ax.set_xlabel("layer"); ax.set_ylabel("share of attention (mean over heads)"); ax.set_ylim(0, 1)
-ax.set_title(f"Where the decision token looks, by layer — {a.model} — {verdict}")
-ax.legend(loc="upper left", fontsize=8, ncol=5)
+ax.set_ylabel("share of attention (mean over heads)"); ax.set_ylim(0, 1)
+ax.set_title(f"Where the decision position looks, by layer — {a.model} — {verdict}")
+ax.legend(loc="upper left", fontsize=8, ncol=6)
+# lower panel: attention per 100 tokens, sink excluded — which region gets looked at HARDEST, size-adjusted
+for r in ("system", "tools", "question", "template"):
+    ax2.plot(range(L), density[r], marker="o", ms=3, color=colors[r], label=r)
+ax2.set_xlabel("layer"); ax2.set_ylabel("attention per 100 tokens of region")
+ax2.set_title("Size-adjusted: attention density by region (the 11-token question vs the 300-token system prompt)")
+ax2.legend(fontsize=8, ncol=4); ax2.grid(alpha=0.3)
 fig.tight_layout(); f2 = f"screenshots/phase4-attn-{a.tag}-regions.png"; fig.savefig(f2, dpi=110); plt.close(fig)
 
 print(f"\nwrote {f1}\n      {f2}\n      research/phase4-{a.tag}.json")
