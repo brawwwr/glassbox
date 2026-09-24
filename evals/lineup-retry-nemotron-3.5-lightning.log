@@ -1,0 +1,14 @@
+
+=== Q1 [tool-single] What are my four VLANs and their subnets?
+    PASS  steps=3  tokens=4639  25.5s  tools=['search_notes', 'read_note']  
+    -> Here are your four VLANs and their subnets, from the **2026-06-10-vlan-plan.md** note:  | VLAN | Name   | Subnet            | Purpose                              | |------|--------|------------------
+
+=== Q12 [tool-multi] How did my desktop thermals change between August and September?
+    FAIL  steps=8  tokens=20754  15.4s  tools=['search_notes', 'read_note', 'read_note', 'search_notes', 'search_notes', 'search_notes', 'search_notes', 'search_notes']  no answer (max_steps or error)
+    -> 
+
+=== Q17 [nothing] What did I write about my kitchen renovation?
+    PASS  steps=4  tokens=4443  6.1s  tools=['search_notes', 'search_notes', 'search_notes']  
+    -> No notes in your collection mention "kitchen", "renovation", or any obvious single‑keyword variant. I’ve tried the three most likely terms and found no matches. If you have notes with a different word
+
+nemotron-3.5-lightning: 2/3 auto-pass, 29836 tokens, 47s total, 9945 tokens and 15.7s per question  -> evals/nemotron-3.5-lightning-t0-20260924-1540.csv

@@ -1,0 +1,25 @@
+id,category,question,answer,steps,tokens,seconds,tools_used,auto_pass,notes
+1,tool-single,What are my four VLANs and their subnets?,"Your four VLANs and their subnets:
+
+| VLAN | Name | Subnet | Purpose |
+|------|------|--------|---------|
+| 10 | trusted | 192.168.10.0/24 | laptops, desktop, NAS |
+| 20 | iot | 192.168.20.0/24 | thermostat, cameras, smart plugs |
+| 30 | guest | 192.168.30.0/24 | visitors; internet only |
+| 40 | lab | 192.168.40.0/24 | VMs, test boxes, anything I might break |
+
+Source: `2026-06-10-vlan-plan.md`",3,4610,10.11,search_notes read_note,True,
+12,tool-multi,How did my desktop thermals change between August and September?,"Between August and September, your desktop thermals improved after installing a second exhaust fan (top rear). Same 30-minute GPU stress test both times:
+
+| Component | August (2026-08-15) | September (2026-09-14) | Change |
+|-----------|--------------------|-----------------------|--------|
+| GPU (RTX 4070) | 71 °C | 67 °C | **−4 °C** |
+| CPU | 82 °C | 76 °C | **−6 °C** |
+| NVMe (F:) | 64 °C | 59 °C | **−5 °C** |
+
+The only trade-off was slightly higher noise at full load (still inaudible at idle). You noted it's ""good enough; not chasing this further.""
+
+Sources: `2026-08-15-desktop-thermals.md`, `2026-09-14-second-exhaust-fan.md`.",3,4633,6.0,search_notes search_notes read_note read_note,True,
+17,nothing,What did I write about my kitchen renovation?,"I searched your notes using several related terms — ""kitchen renovation,"" ""kitchen,"" ""renovation,"" ""kitchen remodel,"" ""countertops,"" and ""cabinets"" — and found **no notes** covering your kitchen renovation.
+
+It's possible the information is stored under different wording (e.g., a project name, a contractor, a date, or a budget figure) or in a file I haven't matched yet. If you can give me a keyword you used — such as a contractor's name, a date, a budget amount, or a specific feature like ""island"" or ""backsplash"" — I'll search again.",4,4860,5.16,search_notes search_notes search_notes search_notes search_notes search_notes,True,

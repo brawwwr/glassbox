@@ -1,0 +1,14 @@
+
+=== Q1 [tool-single] What are my four VLANs and their subnets?
+    PASS  steps=3  tokens=4610  10.1s  tools=['search_notes', 'read_note']  
+    -> Your four VLANs and their subnets:  | VLAN | Name | Subnet | Purpose | |------|------|--------|---------| | 10 | trusted | 192.168.10.0/24 | laptops, desktop, NAS | | 20 | iot | 192.168.20.0/24 | ther
+
+=== Q12 [tool-multi] How did my desktop thermals change between August and September?
+    PASS  steps=3  tokens=4633  6.0s  tools=['search_notes', 'search_notes', 'read_note', 'read_note']  
+    -> Between August and September, your desktop thermals improved after installing a second exhaust fan (top rear). Same 30-minute GPU stress test both times:  | Component | August (2026-08-15) | September
+
+=== Q17 [nothing] What did I write about my kitchen renovation?
+    PASS  steps=4  tokens=4860  5.2s  tools=['search_notes', 'search_notes', 'search_notes', 'search_notes', 'search_notes', 'search_notes']  
+    -> I searched your notes using several related terms — "kitchen renovation," "kitchen," "renovation," "kitchen remodel," "countertops," and "cabinets" — and found **no notes** covering your kitchen renov
+
+ornith-1.5:9b: 3/3 auto-pass, 14103 tokens, 21s total, 4701 tokens and 7.1s per question  -> evals/ornith-1.5_9b-t0-20260924-1539.csv
