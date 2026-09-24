@@ -1,30 +1,35 @@
-# NEXT — Phase 4, micro lens (updated 24 Sep 2026, night)
+# NEXT — Phase 4, first pictures (updated 24 Sep 2026, night)
 
-Interlude closed. Working model is **gemma4:12b** (agent.py / run_evals.py defaults changed). Comparisons: ornith-1.5:9b,
-granite4.1:8b; baseline qwen3:14b. Details: NOTES.md "Interlude".
+Release notes read (research/docs/). Key facts: TransformerLens 4.0 removed `HookedTransformer.from_pretrained`;
+the new path is `TransformerBridge.boot_transformers("Qwen/Qwen3-1.7B")` + `run_with_cache`. transformers 5.17:
+nothing breaking for us (`torch_dtype` → `dtype`). Qwen3-1.7B: 28 layers, 16 heads; its template renders tools
+and has `<tool_call>` as a real token. `scratch/04_replay.py` is written against these.
 
-## Before Phase 4's first run
-
-[PC-PowerShell]
+## [PC-PowerShell] — free the GPU
 ```powershell
-ollama stop gemma4:12b
-ollama ps                 # empty — the Hugging Face model needs the VRAM
+ollama ps
+ollama stop <whatever is listed>       # e.g. ollama stop gemma4:12b
 ```
 
-[PC-Ubuntu]
+## [PC-Ubuntu] — first run downloads Qwen3-1.7B (~3.4 GB), then ~1 minute
 ```bash
 cd ~/glassbox && git pull
-uv add transformers accelerate matplotlib
-uv pip show transformers | head -2      # tell Claude the version (expect 5.x)
+uv run scratch/04_replay.py
+uv run scratch/04_replay.py --question "What is 17 times 23?" --tag notool
+git add -A && git commit -m "phase4: first attention maps" && git push
 ```
+Each run prints: prompt token count by region (system / tools / question / template), the first ~40 generated
+tokens, a verdict ("<tool_call> emitted as generated token #N" or "no <tool_call>"), and the attention share the
+decision token gives each region in the last 4 layers. PNGs → screenshots/, JSON → research/.
 
-## Release notes Claude needs (the Mac has no web) — one script, one push
-Claude will write `scratch/fetch_docs.py` to save the TransformerLens 4.0 release notes and the transformers 5 migration
-guide into `research/`. Run it, push, pull on the Mac. Then Claude writes `scratch/04_replay.py`.
+If the tool-worthy question does NOT produce a <tool_call>, try `--model Qwen/Qwen3-4B` (8 GB, still fits with
+Ollama unloaded) — the observation only works if the behaviour happens.
 
-## Phase 4 plan (unchanged in shape)
-1. Attention map with plain transformers on Qwen3-1.7B (or 0.6B): render the Phase 2 prompt with
-   `apply_chat_template(tools=TOOLS, enable_thinking=False)`, greedy-generate ~30 tokens, confirm `<tool_call>`, plot
-   attention from that token back to the question. PNGs → screenshots/. Then the same for a no-tool question.
-2. TransformerLens 4.0: logit lens (P(<tool_call>) per layer), crossover layer. Second weekend.
-3. Caveat paragraph: the small model is a proxy for gemma4:12b / qwen3:14b, not the same thing.
+## [Mac]
+```bash
+cd ~/projects/glassbox && git pull
+```
+Say "pulled". Claude reads the two PNG pairs and the JSONs and writes the Phase 4 step-1 notes.
+
+## Step 2 (next sitting): TransformerLens 4 logit lens
+`uv add transformer_lens` → `TransformerBridge.boot_transformers(...)` → `run_with_cache` → P(<tool_call>) per layer.
