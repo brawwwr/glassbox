@@ -120,6 +120,13 @@ PRICES = {
     "qwen3:30b-a3b": (0.15, 0.60),
     "ornith:35b": (0.20, 0.60),
     "gemma4": (0.05, 0.20),
+    # challengers from the 24 Sep ecosystem scan (illustrative hosted prices for their size class)
+    "gemma4:12b": (0.15, 0.50),
+    "lfm2.5:8b": (0.08, 0.25),
+    "granite4.1:8b": (0.10, 0.30),
+    "granite4.2:8b": (0.10, 0.30),
+    "ornith-1.5:9b": (0.10, 0.30),
+    "nemotron-3.5-lightning": (0.15, 0.60),
 }
 
 

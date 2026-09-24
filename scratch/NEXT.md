@@ -1,21 +1,26 @@
-# NEXT — ecosystem scan, then Phase 4 (updated 24 Sep 2026)
+# NEXT — challenger bench, then Phase 4 (updated 24 Sep 2026)
 
-Claude's session cannot reach the web, so the PC does the looking. One script, one push.
+Ecosystem scan done → `research/assessment-2026-09-24.md`. Decision: keep `qwen3:14b` as baseline; bench five
+challengers that fit the 12 GB card and pick the working model for Phases 5–8 on data.
 
-## [PC-Ubuntu] — run the scan (~3 minutes, no keys needed)
+## [PC-Ubuntu] — pull ~30 GB, then ~25 min of evals (walk away)
 
 ```bash
 cd ~/glassbox && git pull
-uv run scratch/model_scan.py
-git add -A && git commit -m "research: ecosystem scan" && git push
+bash scratch/05_challengers.sh
+git add -A && git commit -m "research: challenger bench" && git push
 ```
 
-It writes `research/scan-<date>.md`: newest Ollama models with capability tags and sizes, our current models
-re-checked, Hugging Face trending/newest, latest releases of every tool in the plan, and recently active GitHub
-repos for agents / interpretability / tracing / MCP / evals. Claude reads it from the Mac clone and writes up
-what changed and what (if anything) to swap.
+Candidates: gemma4:12b, lfm2.5:8b, granite4.1:8b, ornith-1.5:9b, nemotron-3.5-lightning.
+If a pull fails, the tag differs — check ollama.com/library/<name> and edit MODELS in the script.
 
-If a section says "rate-limited", just re-run in ten minutes; GitHub search allows 10 requests/minute anonymously.
+## [Mac]
+```bash
+cd ~/projects/glassbox && git pull
+```
+Say "pulled". Claude reads `evals/*t0*.csv`, `evals/challenger-fit.txt`, `evals/challenger-trace-summary.txt`.
 
-## Then Phase 4 (unchanged) — see previous NEXT: `ollama stop qwen3:14b`, `uv add transformers accelerate matplotlib`,
-Claude writes `scratch/04_replay.py`.
+## Then Phase 4 — with two cautions from the scan
+- TransformerLens **4.0.0** (released 21 Sep) and transformers **5.x**: read release notes before writing code.
+- CircuitsVis is unmaintained → matplotlib only.
+Pre-run: `ollama stop <model>` in PowerShell; `uv add transformers accelerate matplotlib` in Ubuntu.
