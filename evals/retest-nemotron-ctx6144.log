@@ -1,0 +1,10 @@
+
+=== Q1 [tool-single] What are my four VLANs and their subnets?
+    PASS  steps=3  tokens=4590  21.9s  tools=['search_notes', 'read_note']  
+    -> Your four VLANs and their subnets are:  | VLAN | Name   | Subnet            | Purpose                          | |------|--------|-------------------|----------------------------------| | 10   | trust
+
+=== Q12 [tool-multi] How did my desktop thermals change between August and September?
+    FAIL  steps=8  tokens=20754  14.7s  tools=['search_notes', 'read_note', 'read_note', 'search_notes', 'search_notes', 'search_notes', 'search_notes', 'search_notes']  no answer (max_steps or error)
+    -> 
+
+nemotron-3.5-lightning: 1/2 auto-pass, 25344 tokens, 37s total, 12672 tokens and 18.3s per question  -> evals/nemotron-3.5-lightning-t0-20260924-1503.csv

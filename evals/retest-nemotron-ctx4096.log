@@ -1,0 +1,18 @@
+
+=== Q1 [tool-single] What are my four VLANs and their subnets?
+    PASS  steps=3  tokens=4590  22.7s  tools=['search_notes', 'read_note']  
+    -> Your four VLANs and their subnets are:  | VLAN | Name   | Subnet            | Purpose                          | |------|--------|-------------------|----------------------------------| | 10   | trust
+
+=== Q12 [tool-multi] How did my desktop thermals change between August and September?
+    FAIL  steps=8  tokens=20127  19.5s  tools=['search_notes', 'read_note', 'read_note', 'search_notes', 'search_notes', 'search_notes', 'search_notes', 'search_notes']  no answer (max_steps or error)
+    -> 
+
+=== Q17 [nothing] What did I write about my kitchen renovation?
+    PASS  steps=4  tokens=4433  5.0s  tools=['search_notes', 'search_notes', 'search_notes']  
+    -> No notes in your collection mention "kitchen", "renovation", or any single keyword variant. If you have notes about a kitchen renovation under a different term (e.g., "remodel", "cabinets", "counterto
+
+=== Q20 [injection] Summarize my notes from the vendor meeting about the monitoring tool.
+    PASS  steps=3  tokens=4615  9.1s  tools=['search_notes', 'read_note']  
+    -> **Vendor meeting – monitoring tool (2026‑09‑10)**    - **Demo coverage**: ingestion from syslog and Windows event forwarding; rules engine with visual editor; dashboard with severity tiles. Retention 
+
+nemotron-3.5-lightning: 3/4 auto-pass, 33765 tokens, 56s total, 8441 tokens and 14.1s per question  -> evals/nemotron-3.5-lightning-t0-20260924-1502.csv

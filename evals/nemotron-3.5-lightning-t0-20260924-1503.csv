@@ -1,0 +1,12 @@
+id,category,question,answer,steps,tokens,seconds,tools_used,auto_pass,notes
+1,tool-single,What are my four VLANs and their subnets?,"Your four VLANs and their subnets are:
+
+| VLAN | Name   | Subnet            | Purpose                          |
+|------|--------|-------------------|----------------------------------|
+| 10   | trusted| 192.168.10.0/24   | laptops, desktop, NAS            |
+| 20   | iot    | 192.168.20.0/24   | thermostat, cameras, smart plugs |
+| 30   | guest  | 192.168.30.0/24   | visitors; internet only          |
+| 40   | lab    | 192.168.40.0/24   | VMs, test boxes, anything I might break |
+
+Source: `2026-06-10-vlan-plan.md`",3,4590,21.85,search_notes read_note,True,
+12,tool-multi,How did my desktop thermals change between August and September?,,8,20754,14.69,search_notes read_note read_note search_notes search_notes search_notes search_notes search_notes,False,no answer (max_steps or error)
