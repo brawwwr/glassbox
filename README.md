@@ -28,6 +28,8 @@ Everything runs locally and free: Ollama on Windows, Python in WSL2, Docker for 
 1. Baseline numbers — bench eight models, find the VRAM cliff ✔
 2. Naked agent loop — ~100 lines, no framework ✔ (18–20/20 on three models; see NOTES.md)
 3. Macro lens — Langfuse traces ✔ (99.9% of wall time is the model; cost is 88% input tokens; see NOTES.md)
+   - Interlude (24 Sep): ecosystem scan + challenger bench. Working model is now **gemma4:12b** (20/20 at temp 0, fits with 16k
+     headroom); ornith-1.5:9b (caught the prompt injection) and granite4.1:8b (fastest) as comparisons; qwen3:14b stays as baseline.
 4. Micro lens — TransformerLens attention and logit lens
 5. One screen — Gradio page showing both lenses
 6. MCP — swap an in-process tool for an MCP server

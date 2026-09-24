@@ -59,7 +59,7 @@ def auto_check(q, result):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--model", default="qwen3:14b")
+    ap.add_argument("--model", default="gemma4:12b")
     ap.add_argument("--ids", type=int, nargs="*", help="only run these question ids")
     ap.add_argument("--max-steps", type=int, default=8)
     ap.add_argument("--ctx", type=int, default=8192)

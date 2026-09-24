@@ -169,7 +169,7 @@ def call_tool(name, args):
 
 
 @observe(name="glassbox-agent")
-def run_agent(question, model="qwen3:14b", max_steps=8, ctx=8192, max_out=600, quiet=False, temperature=None, tags=None):
+def run_agent(question, model="gemma4:12b", max_steps=8, ctx=8192, max_out=600, quiet=False, temperature=None, tags=None):
     Path("runs").mkdir(exist_ok=True)
     trace_path = Path("runs") / f"{datetime.datetime.now():%Y%m%d-%H%M%S}.jsonl"
 
@@ -260,7 +260,7 @@ def flush():
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="GlassBox agent loop")
     ap.add_argument("question", nargs="+", help="the question to answer")
-    ap.add_argument("--model", default="qwen3:14b")
+    ap.add_argument("--model", default="gemma4:12b")  # working model since 24 Sep (see NOTES.md Interlude); qwen3:14b is the Phase 1-3 baseline
     ap.add_argument("--max-steps", type=int, default=8)
     ap.add_argument("--ctx", type=int, default=8192)
     ap.add_argument("--max-out", type=int, default=600)

@@ -338,14 +338,36 @@ the same on CPU only (`num_gpu=0`); the same on GPU at 4k ctx — plus the serve
 | qwen3:14b (baseline) | 18–20/20 | ~3,100–4,100 | 3–6 | spills >8k | one-reads Q12; run-to-run variance at temp 0.8 |
 | nemotron-3.5-lightning | 3/4 (ctx ≤6k) | ~8,400 | 14 | spills; GPU bug >6k | loops on Q12 |
 
-### Lineup going forward (pending `scratch/06_confirm_lineup.sh`: bench speeds + a temp-0 run of the 14B)
-- **Working model (Phases 5–8): gemma4:12b** — fewest tokens, top-10 model, fits with 16k headroom.
+### Confirmation run (`scratch/06_confirm_lineup.sh`, Ollama 0.34.4, CTX 8192, 4k-token prompt)
+
+| model | footprint | GPU | decode tok/s | prefill tok/s | eval @ temp 0 |
+|---|---|---|---|---|---|
+| qwen3:14b | 10.3 GB | 100% | 41 | 2,400 | **17/20** (skipped search on Q5; one-read Q12; one "nothing" phrasing) |
+| **gemma4:12b** | 8.4 GB | 100% | 47 | 2,400 | 20/20 |
+| granite4.1:8b | 6.7 GB | 100% | 66 | 3,950 | 20/20 |
+| ornith-1.5:9b | 5.8 GB | 100% | 71 | 3,350 | 20/20 |
+| lfm2.5:8b | 5.4 GB | 100% | **252** | 13,200 | 18/20 |
+
+- The 14B's earlier 18–20/20 included lucky draws at temperature 0.8; like-for-like at temp 0 it is 17/20 against three 20/20s.
+- lfm2.5:8b decodes at 252 tok/s — 5× the 14B — because only 1B of its 8B parameters are active per token. The Phase 1 MoE lesson
+  at the small end. Fastest model tested and the one that believed the decoy: speed and judgement are separate axes.
+- ornith-1.5:9b **refused** an 8,200-token prompt at an 8k window with `400: request exceeds the available context size` instead of
+  silently truncating as qwen3:14b did in Phase 1. The hybrid recurrent architecture cannot do llama.cpp's context-shift trick.
+  The error is the better behaviour. Filed next to Phase 1 finding #6.
+
+### Lineup — final (24 Sep)
+- **Working model (Phases 5–8): gemma4:12b** — 20/20, fewest tokens, 15% faster than the 14B, 8.4 GB leaves headroom for a 16k
+  context. `agent.py` and `run_evals.py` now default to it.
 - **Security-aware comparison: ornith-1.5:9b** — the one that caught the injection; the cyber-audience story.
 - **Fast / enterprise comparison: granite4.1:8b.**
 - **Baseline / continuity: qwen3:14b** — all Phase 1–3 numbers are on it.
 - Spilled comparisons when a phase wants them: **gpt-oss:20b** (different lineage), **nemotron-3.5-lightning @ ctx 6144** or qwen3:30b-a3b (MoE).
 - **Cautionary example: lfm2.5:8b.** **Judge candidate for Phase 8: granite4.1-guardian** (not yet pulled).
 - Three resident 20/20 models with three different personalities is the real result of this interlude.
+
+**Interlude closed 24 Sep.** Cost: one evening of unattended runs plus two rounds of reading failures. Value: the working model
+for the rest of the project chosen on 20 identical questions at temperature 0, with speed and fit measured, and a model that
+catches prompt injections found along the way.
 
 ### Lessons
 - The eval harness paid for itself: five new models assessed in ~25 minutes of unattended runtime, with the same 20 questions

@@ -1,28 +1,30 @@
-# NEXT — confirm the lineup, then Phase 4 (updated 24 Sep 2026, evening)
+# NEXT — Phase 4, micro lens (updated 24 Sep 2026, night)
 
-Crash diagnosis done: ornith-1.5:9b fixed by Ollama 0.34.4 (20/20; only model to flag the injection);
-nemotron-3.5-lightning runs at ctx ≤ 6144 but loops. Grader widened. Details in NOTES.md "Interlude".
+Interlude closed. Working model is **gemma4:12b** (agent.py / run_evals.py defaults changed). Comparisons: ornith-1.5:9b,
+granite4.1:8b; baseline qwen3:14b. Details: NOTES.md "Interlude".
 
-Proposed lineup: gemma4:12b (working) · ornith-1.5:9b (security-aware comparison) · granite4.1:8b (fast) ·
-qwen3:14b (baseline). One confirmation run left.
+## Before Phase 4's first run
 
-## [PC-Ubuntu] — ~10 minutes, unattended
+[PC-PowerShell]
+```powershell
+ollama stop gemma4:12b
+ollama ps                 # empty — the Hugging Face model needs the VRAM
+```
+
+[PC-Ubuntu]
 ```bash
 cd ~/glassbox && git pull
-bash scratch/06_confirm_lineup.sh
-git add -A && git commit -m "research: lineup confirmation" && git push
+uv add transformers accelerate matplotlib
+uv pip show transformers | head -2      # tell Claude the version (expect 5.x)
 ```
-(It runs the 14B's full temp-0 eval, bench.py on 14b/gemma4:12b/granite4.1:8b/lfm2.5:8b, retries — now moot — and
-pulls granite4.1-guardian. The retry step will just re-run 3 questions on the two models; harmless.)
 
-## [Mac]
-```bash
-cd ~/projects/glassbox && git pull
-```
-Say "pulled". Claude finalises: adds ornith-1.5:9b to the bench list result table, sets agent.py's default model,
-updates NOTES.md and the checklist.
+## Release notes Claude needs (the Mac has no web) — one script, one push
+Claude will write `scratch/fetch_docs.py` to save the TransformerLens 4.0 release notes and the transformers 5 migration
+guide into `research/`. Run it, push, pull on the Mac. Then Claude writes `scratch/04_replay.py`.
 
-## Then Phase 4 — micro lens
-Pre-run: `ollama stop gemma4:12b` (or whatever is resident) [PC-PowerShell]; `uv add transformers accelerate matplotlib`
-[PC-Ubuntu]. Claude writes scratch/04_replay.py after reading TransformerLens 4.0 / transformers 5 release notes
-(fetched to the repo by a scratch script if the Mac still has no web access).
+## Phase 4 plan (unchanged in shape)
+1. Attention map with plain transformers on Qwen3-1.7B (or 0.6B): render the Phase 2 prompt with
+   `apply_chat_template(tools=TOOLS, enable_thinking=False)`, greedy-generate ~30 tokens, confirm `<tool_call>`, plot
+   attention from that token back to the question. PNGs → screenshots/. Then the same for a no-tool question.
+2. TransformerLens 4.0: logit lens (P(<tool_call>) per layer), crossover layer. Second weekend.
+3. Caveat paragraph: the small model is a proxy for gemma4:12b / qwen3:14b, not the same thing.
