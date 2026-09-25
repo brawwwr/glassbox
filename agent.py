@@ -169,7 +169,9 @@ def call_tool(name, args):
 
 
 @observe(name="glassbox-agent")
-def run_agent(question, model="gemma4:12b", max_steps=8, ctx=8192, max_out=600, quiet=False, temperature=None, tags=None):
+def run_agent(question, model="gemma4:12b", max_steps=8, ctx=8192, max_out=600, quiet=False, temperature=None, tags=None,
+              on_event=None):
+    """on_event(str): optional callback receiving each step-log line as it happens (used by app.py to stream)."""
     Path("runs").mkdir(exist_ok=True)
     trace_path = Path("runs") / f"{datetime.datetime.now():%Y%m%d-%H%M%S}.jsonl"
 
@@ -181,6 +183,11 @@ def run_agent(question, model="gemma4:12b", max_steps=8, ctx=8192, max_out=600, 
     def say(msg):
         if not quiet:
             print(msg, flush=True)
+        if on_event:
+            try:
+                on_event(msg)
+            except Exception:
+                pass
 
     messages = [{"role": "system", "content": SYSTEM}, {"role": "user", "content": question}]
     tokens_in = tokens_out = 0
@@ -241,6 +248,13 @@ def run_agent(question, model="gemma4:12b", max_steps=8, ctx=8192, max_out=600, 
 
     cost = est_cost(model, tokens_in, tokens_out)
     result["est_cost_usd"] = round(cost["input"] + cost["output"], 6)
+    result["trace_url"] = None
+    if TRACING and _lf is not None:
+        try:
+            result["trace_id"] = _lf.get_current_trace_id()
+            result["trace_url"] = _lf.get_trace_url()
+        except Exception:
+            pass
     lf("update_current_span", output=result["answer"],
        metadata={"model": model, "steps": result["steps"], "tokens_in": tokens_in, "tokens_out": tokens_out,
                  "seconds": result["seconds"], "tools_used": tools_used, "error": result["error"],

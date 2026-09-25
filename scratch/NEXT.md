@@ -1,24 +1,37 @@
-# NEXT — Phase 4 closed; Phase 5 next (updated 24 Sep 2026, late)
+# NEXT — Phase 5, one screen (updated 25 Sep 2026)
 
-Phase 4 checkpoint reached. Write-up in NOTES.md (steps 1, 1b, 2, caveat paragraph, translation table).
-Composite figure: screenshots/phase4-checkpoint.png.
+Written: `replay.py` (Phase 4 as an importable class), `app.py` (Gradio page), small additions to `agent.py`
+(step-log callback, Langfuse trace URL in the result).
 
-## [Mac] — land it
+## [PC-Ubuntu]
 ```bash
-cd ~/projects/glassbox && git add -A && git commit -m "phase4: checkpoint — notes, composite figure" && git push
+cd ~/glassbox && git pull
+uv add gradio
+uv run app.py
 ```
+Then open **http://localhost:7860** in a browser on the PC. Type a question, click Run.
 
-## Phase 5 preview — one screen (Gradio 6.x)
-Goal: a local web page: question box → left column live step log + Langfuse link + cost; right column the Phase 4
-pictures for the same prompt (attention-by-region + logit lens) from the 1.7B replay.
+What should happen: the step log fills line by line on the left as the agent works; the answer and a stats line
+(steps · tokens · seconds · est. cost · Langfuse link) appear; then the log says it is unloading gemma4:12b and
+replaying through Qwen3-1.7B (first time: ~10 s load); two pictures appear on the right.
 
-Before the first run:
-- [PC-Ubuntu] `uv add gradio` (Gradio 6 — Claude has the release notes in research/docs/gradio-releases.md)
-- VRAM plan: gemma4:12b (8.4 GB) + Qwen3-1.7B (3.4 GB + attention buffers) will NOT both fit in 12 GB. Sequence per
-  request: run the agent via Ollama → `ollama stop gemma4:12b` (or rely on keep_alive=0 for that call) → load the 1.7B
-  for the replay. Or keep the 1.7B on CPU (112 GB RAM; ~10× slower but fine for one forward pass). Claude will
-  write `app.py` with a `--replay-device` flag so both can be tried.
-- Reuse: run_agent() already returns steps/tokens/cost/trace path; 04_replay.py's functions will be factored into
-  `replay.py` so the app can import them.
+Try three questions: the VLAN one (tool call), "What is 17 times 23?" (no tool), and the backups one (decoy).
 
-Claude writes app.py + replay.py next session; you pull and `uv run app.py`, then open http://localhost:7860.
+If VRAM is tight or the replay errors, restart with:
+```bash
+uv run app.py --replay-device cpu
+```
+(replay ~30–60 s on CPU, but nothing gets evicted from the GPU.)
+
+Stop the app with Ctrl+C in the terminal.
+
+## Report back
+Screenshot of the page after a run → screenshots/phase5-one-screen.png (Win+Shift+S, save to
+\\wsl.localhost\Ubuntu-24.04\home\administrator\glassbox\screenshots\). Then:
+```bash
+git add -A && git commit -m "phase5: one screen" && git push
+```
+[Mac] `git pull` → "pulled". Claude writes the Phase 5 notes and checkpoint.
+
+Things that may need a tweak on first run (tell Claude the error text): Gradio 6 component argument names;
+the `type="filepath"` on gr.Image; port 7860 already in use (add `--port 7861`).
