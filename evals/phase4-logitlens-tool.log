@@ -1,0 +1,36 @@
+booting TransformerBridge for Qwen/Qwen3-1.7B on cuda ...
+Loading weights:   0%|          | 0/311 [00:00<?, ?it/s]Loading weights:   0%|          | 1/311 [00:00<00:48,  6.40it/s]Loading weights:  39%|███▉      | 121/311 [00:00<00:00, 563.13it/s]Loading weights:  68%|██████▊   | 212/311 [00:00<00:00, 698.93it/s]Loading weights:  97%|█████████▋| 301/311 [00:00<00:00, 764.18it/s]Loading weights: 100%|██████████| 311/311 [00:00<00:00, 664.22it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Changing model dtype to torch.bfloat16
+prompt tokens: 848
+found 28 residual hooks, e.g. blocks.0.hook_resid_post ... blocks.27.hook_resid_post
+model's actual next token: '<tool_call>'   P(<tool_call>)=0.998
+Traceback (most recent call last):
+  File "/home/administrator/glassbox/scratch/04b_logit_lens.py", line 130, in <module>
+    lg = decode_resid(resid.to(torch.float32) if resid.dtype != torch.float32 else resid)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/administrator/glassbox/scratch/04b_logit_lens.py", line 123, in decode_resid
+    return mod(x)[0, 0].float()
+           ^^^^^^
+  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/transformer_lens/model_bridge/generalized_components/base.py", line 174, in __call__
+    return super().__call__(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/transformer_lens/model_bridge/generalized_components/unembedding.py", line 98, in forward
+    output = self.original_component(hidden_states, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/torch/nn/modules/linear.py", line 134, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: mat1 and mat2 must have the same dtype, but got Float and BFloat16

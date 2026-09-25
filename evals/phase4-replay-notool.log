@@ -1,0 +1,38 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+device=cuda  model=Qwen/Qwen3-1.7B
+prompt: 3,683 chars, 846 tokens
+prompt tokens by region: {'sink': 1, 'system': 330, 'tools': 417, 'question': 9, 'template': 89}
+Loading weights:   0%|          | 0/311 [00:00<?, ?it/s]Loading weights: 100%|██████████| 311/311 [00:00<00:00, 3433.74it/s]
+loaded in 1.0s; layers=28 heads=16
+
+--- generated ---
+17 times 23 is 391.<|im_end|>
+-----------------
+verdict: no <tool_call> in the first tokens | decision position = token 845 of 846 prompt tokens
+
+top attended prompt tokens (sink excluded), mean of last 4 layers:
+  pos  845  template  0.0812  '\\n\\n'
+  pos  843  template  0.0297  '\\n\\n'
+  pos  844  template  0.0257  '</think>'
+  pos  311  system    0.0131  ' arithmetic'
+  pos    2  template  0.0102  '\\n'
+  pos  840  template  0.0095  'assistant'
+  pos  800  template  0.0085  '<tool_call>'
+  pos  838  template  0.0078  '\\n'
+  pos  830  question  0.0070  ' '
+  pos  825  template  0.0057  '<|im_start|>'
+  pos   99  system    0.0056  ' ONE'
+  pos  824  template  0.0041  '\\n'
+
+attention from the decision position (mean over heads):
+  region    tokens  share last4  share all  per 100 tok
+  sink           1        0.607      0.444       44.414
+  system       330        0.100      0.110        0.033
+  tools        417        0.038      0.072        0.017
+  question       9        0.018      0.029        0.317
+  template      89        0.237      0.345        0.388
+
+wrote screenshots/phase4-attn-notool-heads.png
+      screenshots/phase4-attn-notool-regions.png
+      research/phase4-notool.json
+commit and push; Claude reads the PNGs from the Mac clone.
