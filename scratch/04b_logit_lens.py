@@ -106,9 +106,14 @@ alt_id = tok.convert_tokens_to_ids(a.alt) if a.alt else (top_id if top_id != too
 print(f"model's actual next token: {tok.decode([top_id])!r}   P(<tool_call>)={torch.softmax(final_logits, -1)[tool_id]:.3f}")
 
 # the model's own final norm + unembed, found defensively
+def _weight_dtype():
+    for p in bridge.parameters():
+        return p.dtype
+    return torch.bfloat16
+
 def decode_resid(resid_last):
-    """Apply final norm + unembedding to a [d_model] residual vector → logits."""
-    x = resid_last.unsqueeze(0).unsqueeze(0)
+    """Apply final norm + unembedding to a [d_model] residual vector → logits (in the model's own dtype)."""
+    x = resid_last.to(_weight_dtype()).unsqueeze(0).unsqueeze(0)
     for attr in ("ln_final", "ln_f", "norm"):
         mod = getattr(bridge, attr, None)
         if mod is not None:
@@ -127,8 +132,8 @@ def decode_resid(resid_last):
 p_tool, p_alt, top_by_layer = [], [], []
 for h in cands:
     resid = cache[h][0, -1]
-    lg = decode_resid(resid.to(torch.float32) if resid.dtype != torch.float32 else resid)
-    pr = torch.softmax(lg, -1)
+    lg = decode_resid(resid)
+    pr = torch.softmax(lg.float(), -1)
     p_tool.append(float(pr[tool_id]))
     p_alt.append(float(pr[alt_id]) if alt_id is not None else 0.0)
     top_by_layer.append(tok.decode([int(pr.argmax())]))
