@@ -1,28 +1,24 @@
-# NEXT — Phase 4 step 2, the logit lens (updated 24 Sep 2026, night)
+# NEXT — Phase 4 closed; Phase 5 next (updated 24 Sep 2026, late)
 
-Step 1 done and written up (NOTES.md Phase 4): the 1.7B makes the same tool-call decision as the 14B on token #1;
-attention is dominated by the sink; the question is read 2× harder when answering directly; a few late heads look
-at the search_notes schema. Attention alone is a weak "why" — step 2 asks WHERE IN DEPTH the decision forms.
+Phase 4 checkpoint reached. Write-up in NOTES.md (steps 1, 1b, 2, caveat paragraph, translation table).
+Composite figure: screenshots/phase4-checkpoint.png.
 
-## [PC-Ubuntu] — GPU must be free of Ollama (`ollama stop <model>` in PowerShell if `ollama ps` shows anything)
-
+## [Mac] — land it
 ```bash
-cd ~/glassbox && git pull
-uv run scratch/04_replay.py                       # re-run: now also prints the top attended TOKENS by name
-uv add transformer_lens                           # TransformerLens 4.x
-uv run scratch/04b_logit_lens.py                  # tool question
-uv run scratch/04b_logit_lens.py --question "What is 17 times 23?" --tag notool
-git add -A && git commit -m "phase4: top tokens + logit lens" && git push
+cd ~/projects/glassbox && git add -A && git commit -m "phase4: checkpoint — notes, composite figure" && git push
 ```
 
-The logit-lens script discovers TransformerLens 4's residual-stream hook names at runtime. If it prints
-"Could not find residual-stream hooks" followed by a list, copy that list into evals/ or paste it — one pattern
-change fixes it. Same if `decode_resid` complains: it tries ln_final / ln_f / norm and unembed / lm_head.
+## Phase 5 preview — one screen (Gradio 6.x)
+Goal: a local web page: question box → left column live step log + Langfuse link + cost; right column the Phase 4
+pictures for the same prompt (attention-by-region + logit lens) from the 1.7B replay.
 
-Expected output: a table of P(<tool_call>) per layer and a crossover layer; PNG → screenshots/phase4-logitlens-<tag>.png.
+Before the first run:
+- [PC-Ubuntu] `uv add gradio` (Gradio 6 — Claude has the release notes in research/docs/gradio-releases.md)
+- VRAM plan: gemma4:12b (8.4 GB) + Qwen3-1.7B (3.4 GB + attention buffers) will NOT both fit in 12 GB. Sequence per
+  request: run the agent via Ollama → `ollama stop gemma4:12b` (or rely on keep_alive=0 for that call) → load the 1.7B
+  for the replay. Or keep the 1.7B on CPU (112 GB RAM; ~10× slower but fine for one forward pass). Claude will
+  write `app.py` with a `--replay-device` flag so both can be tried.
+- Reuse: run_agent() already returns steps/tokens/cost/trace path; 04_replay.py's functions will be factored into
+  `replay.py` so the app can import them.
 
-## [Mac]
-```bash
-cd ~/projects/glassbox && git pull
-```
-Say "pulled". Claude reads the JSONs/PNGs, writes step 2 into NOTES.md, and the Phase 4 caveat paragraph.
+Claude writes app.py + replay.py next session; you pull and `uv run app.py`, then open http://localhost:7860.

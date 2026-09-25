@@ -438,4 +438,79 @@ Method notes worth keeping: measure at the position that *predicts* the decision
 this wrong and saw 63% self-attention at layer 0); find the tools block with the *last* `<tools>` because the template mentions
 `<tools></tools>` in a sentence first; split the sink out as its own region or it hides everything.
 
-### Step 2 — logit lens on TransformerLens 4 (pending: `scratch/04b_logit_lens.py`)
+### Step 1b — the exact tokens the decision looks at (sink excluded, mean of last 4 layers)
+
+| tool question → `<tool_call>` | no-tool question → direct answer |
+|---|---|
+| pos 800 `<tool_call>` (in the template's format instructions) 0.080 | pos 845 `\n\n` 0.081 |
+| pos 847 `\n\n` 0.062 | pos 843 `\n\n` 0.030 |
+| pos 805 `<tool_call>` (second occurrence in the instructions) 0.023 | pos 844 `</think>` 0.026 |
+| pos 845 `\n\n` 0.022 | **pos 311 ` arithmetic`** (system prompt: "For general knowledge or arithmetic, answer directly without tools") 0.013 |
+| pos 846 `</think>` 0.013 | pos 840 `assistant` 0.010 |
+| pos 842 `assistant` 0.008 | pos 800 `<tool_call>` 0.009 |
+| pos 359 `tools` (block header) 0.005 | **pos 99 ` ONE`** (system prompt: "try ONE alternative keyword") 0.006 |
+| pos 807 `{"` (start of the format example) 0.004 | |
+
+When it is about to call a tool, the decision position looks at the two earlier places in the prompt where `<tool_call>` appears
+as an example of the format, and at `{"` — a textbook **induction / copying** pattern: "this token appeared before; here is what
+followed." When it decides to answer directly, it looks at the **system-prompt rule that permits it** (" arithmetic"). Tool question →
+look up how to format a call; arithmetic question → look up the rule that says don't. That is the micro-lens finding, at token resolution,
+from plain transformers.
+
+### Step 2 — logit lens on TransformerLens 4 (`scratch/04b_logit_lens.py`)
+
+`TransformerBridge.boot_transformers("Qwen/Qwen3-1.7B")` worked first time on TL 4.0.0; the residual hooks keep the familiar names
+(`blocks.N.hook_resid_post`, 28 of them). Only bug: the bridge runs in bf16 and my float32 residuals hit its bf16 unembedding — cast to
+the model dtype. Method: decode the residual stream after each layer with the model's own final norm + unembedding, as if it stopped there,
+and read P(`<tool_call>`) at the decision position.
+
+| layer | tool Q: P(`<tool_call>`) | tool Q: top token | no-tool Q: top token |
+|---|---|---|---|
+| 0–10 | 0.000 | fragments (`options`, `atab`, `pipe`…) | fragments |
+| 11 | 0.000 | `{` | `{` |
+| 17–20 | 0.000 | `plaintext`, `###` | `plaintext`, `None` |
+| 21–22 | 0.000 | **`{\n`** | **`calcul`** |
+| 23–24 | 0.000 | **`{"`** | `Calcul`, `The` |
+| 25 | 0.001 | (noise) | `The` |
+| 26 | **0.097** | `#ifdef` | `The` |
+| 27 | **0.998** | **`<tool_call>`** | `1` (0.465) |
+
+- **The exact decision token appears in the last two layers**: P(`<tool_call>`) is 0 through L24, 0.1% at L25, 9.7% at L26, 99.8% at L27.
+- **The intent is legible from layer 21** (three-quarters depth): the tool case's top prediction is the JSON opener `{\n` → `{"` for layers 21–24
+  — the model is "thinking in tool-call JSON" before it can name the `<tool_call>` token — while the no-tool case's top prediction is
+  `calcul` → `Calcul` → `The`. Same layers, opposite intents, different surface tokens.
+- **Decisions emerge across layers rather than at one point**, exactly as the plan predicted — but the *shape* is: content-free
+  fragments (L0–10) → structural tokens (L11–20) → intent (L21–24) → exact token (L26–27). A raw logit lens on a modern model is often
+  blank until the final layer; here it was readable from L21, which is a nicer result than expected.
+- Caveat: through the bridge the greedy first token for 17×23 was `1` (as in "17 × 23…") where plain transformers produced `271`. bf16
+  numerics differ slightly between the two loaders; a close call flips. Stable *decision*, fragile *surface*.
+
+Figures: `screenshots/phase4-logitlens-{tool,notool}.png`; data `research/phase4-logitlens-*.json`.
+
+### The caveat paragraph (the plan asked for one honest paragraph)
+
+Everything above was measured on **Qwen3-1.7B**, not on gemma4:12b or qwen3:14b, which actually run the agent. The 1.7B makes the same
+first-token decision as the 14B on these two questions, so it is a valid proxy for *whether* the decision happens; the attention and
+logit-lens pictures describe *this* model's mechanism. Larger models have more layers, more heads, and different training; the induction
+pattern and the "intent before token" shape are common across transformer LMs and probably transfer, but the specific layer numbers
+(21, 26, 27) and head positions do not. Attention shares are also a weak proxy for causal importance — a head can attend somewhere
+without that mattering for the output; establishing *importance* needs ablation or activation patching (TransformerLens 4 has EAP /
+attribution patching for exactly this, a natural stretch goal). And the 1.7B got 17 × 23 wrong: behaviour transferred, competence did not.
+Claim what was measured: on a small proxy, the tool-call decision is made by copying the call format from the prompt's instructions,
+the alternative is made by reading the permitting rule, and both intents are readable three-quarters of the way through the network.
+
+### Translation table (Phase 4)
+- attention sink ↔ the "default branch" a flow falls into when no condition matches: it exists, it absorbs cases, it tells you nothing
+- induction heads copying `<tool_call>` from the instructions ↔ a flow reading its own action definition to know what payload shape to emit
+- " arithmetic" attention ↔ the flow's Condition block: the rule that decided which branch ran
+- intent at L21, token at L27 ↔ the decision is made in the Condition step, the output is formatted several steps later
+- proxy caveat ↔ testing a flow against a dev connector: same logic path, not the same data
+
+**Phase 4 checkpoint reached 24 Sep** — one day, not two weekends, because the harness from Phases 2–3 supplied the prompts and the
+release notes were fetched before writing code. Composite figure: `screenshots/phase4-checkpoint.png` (A/B attention by region,
+C/D logit lens). Stretch goals left for later: Qwen3-4B as a closer proxy; attribution patching to test which heads *matter*; a tuned lens.
+
+---
+
+## Phase 5 — one screen (Gradio)
+(pending)
