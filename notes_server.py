@@ -12,11 +12,14 @@ in-process in the agent so the toolset is mixed: one MCP transport, one local ca
 MCP Python SDK 2.x: `MCPServer` replaces 1.x's `FastMCP`; the decorator API is the same shape.
 """
 
-from mcp.server import MCPServer
+try:                                   # SDK ≥ 2.x on main
+    from mcp.server import MCPServer as _Server
+except ImportError:                    # released 1.x / early 2.x
+    from mcp.server.fastmcp import FastMCP as _Server
 
 import tools as local_tools
 
-mcp = MCPServer("glassbox-notes")
+mcp = _Server("glassbox-notes")
 
 
 @mcp.tool()

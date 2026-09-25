@@ -17,8 +17,28 @@ are probed defensively because the SDK is new.
 import asyncio
 import json
 import time
+from contextlib import asynccontextmanager
 
-from mcp import Client
+try:                                    # SDK ≥ 2.x on main: one Client object
+    from mcp import Client as _NewClient
+    _HAVE_NEW = True
+except ImportError:                     # released 1.x / early 2.x: transport + ClientSession
+    _HAVE_NEW = False
+    from mcp import ClientSession
+    from mcp.client.streamable_http import streamablehttp_client
+
+
+@asynccontextmanager
+async def _session(url):
+    """Yield an object with .list_tools() and .call_tool(name, args) on either SDK generation."""
+    if _HAVE_NEW:
+        async with _NewClient(url) as c:
+            yield c
+    else:
+        async with streamablehttp_client(url) as (read, write, *_):
+            async with ClientSession(read, write) as s:
+                await s.initialize()
+                yield s
 
 
 def _run(coro):
@@ -37,7 +57,7 @@ class MCPTools:
 
     # ---- discovery ------------------------------------------------------------------------
     async def _list(self):
-        async with Client(self.url) as c:
+        async with _session(self.url) as c:
             res = await c.list_tools()
         return getattr(res, "tools", res)
 
@@ -68,7 +88,7 @@ class MCPTools:
 
     # ---- calling --------------------------------------------------------------------------
     async def _call(self, name, args):
-        async with Client(self.url) as c:
+        async with _session(self.url) as c:
             return await c.call_tool(name, args or {})
 
     def call(self, name, args):
