@@ -18,6 +18,7 @@ Everything runs locally and free: Ollama on Windows, Python in WSL2, Docker for 
 - `notes/` — the markdown corpus the agent searches (Phase 2+). `notes_corpus_README.md` lists the decoys and test questions.
 - `tools.py`, `agent.py` — Phase 2: three tools and the ~40-line agent loop. `uv run agent.py "your question"`.
 - `evals.json`, `run_evals.py` — 20 test questions and a runner that writes `evals/<model>-<ts>.csv`.
+- `app.py`, `replay.py` — Phase 5: the one-screen Gradio app and the micro-lens module it uses.
 - `scratch/04_replay.py`, `scratch/04b_logit_lens.py` — Phase 4: attention-by-region from the decision position (plain transformers) and
   a logit lens on TransformerLens 4's `TransformerBridge`. `screenshots/phase4-checkpoint.png` is the composite.
 - `scratch/` — hand-off scripts and `NEXT.md`, the live step list. `scratch/03_langfuse_env.sh` sets up Langfuse secrets;
@@ -33,7 +34,7 @@ Everything runs locally and free: Ollama on Windows, Python in WSL2, Docker for 
    - Interlude (24 Sep): ecosystem scan + challenger bench. Working model is now **gemma4:12b** (20/20 at temp 0, fits with 16k
      headroom); ornith-1.5:9b (caught the prompt injection) and granite4.1:8b (fastest) as comparisons; qwen3:14b stays as baseline.
 4. Micro lens — attention + logit lens on Qwen3-1.7B ✔ (decision copies the call format via induction; intent legible from layer 21 of 28, exact token at 26–27; see NOTES.md)
-5. One screen — Gradio page showing both lenses
+5. One screen — Gradio page showing both lenses ✔ (`uv run app.py` → localhost:7860; agent + Langfuse link left, live attention + logit lens right)
 6. MCP — swap an in-process tool for an MCP server
 7. Dissect Hermes Agent and OpenClaw
 8. Evals and a cost-vs-accuracy comparison

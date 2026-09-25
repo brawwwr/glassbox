@@ -512,5 +512,40 @@ C/D logit lens). Stretch goals left for later: Qwen3-4B as a closer proxy; attri
 
 ---
 
-## Phase 5 — one screen (Gradio)
-(pending)
+## Phase 5 — one screen (25 Sep 2026)
+
+`app.py` (Gradio 6.28, `uv run app.py`, http://localhost:7860). One question box; a model picker (gemma4:12b · ornith-1.5:9b ·
+granite4.1:8b · qwen3:14b); a "micro lens" toggle; Run.
+
+- **Left — macro lens.** The step log streams in as the agent works (`run_agent(..., on_event=queue.put)` from a worker thread; the
+  Gradio handler is a generator that yields the growing log). Then the answer, and a stats line: steps · tokens in/out · seconds ·
+  estimated hosted cost · **a link straight into the Langfuse trace** (`get_trace_url()` from SDK 4).
+- **Right — micro lens.** `replay.py` (`Replay.analyse(question)`) re-renders the same prompt through Qwen3-1.7B: the attention-by-region
+  figure and the logit-lens figure from Phase 4, generated live for this question. The HF model and the TransformerLens bridge load
+  lazily on first use and stay resident.
+- **VRAM choreography.** gemma4:12b (8.4 GB) + the 1.7B twice (HF + bridge, ~7 GB with buffers) do not fit in 12 GB. With
+  `--replay-device cuda` the app asks Ollama to evict its model (`keep_alive=0`) before the replay; the next agent call pays a ~10 s reload.
+  `--replay-device cpu` leaves the GPU to Ollama and replays on the CPU (112 GB RAM; slower, fine for one forward pass).
+  This is the Phase 1 model-switching cost, now a UX decision.
+
+First run: worked with no errors (Gradio 6 needed nothing changed from the Blocks/Textbox/Image/Markdown basics). Terminal goes quiet after
+"Changing model dtype to torch.bfloat16" — that is the bridge loading; all progress goes to the browser's step log, not the terminal.
+The live logit lens for "What is 17 times 23?" reproduced the Phase 4 picture on demand: `calcul` at ~L21, `The` at L25, the digit at L27,
+P(`<tool_call>`) flat at zero.
+
+**Checkpoint reached 25 Sep.** One question, one screen: orchestration on the left, network internals on the right.
+Screenshot: `screenshots/phase5-one-screen.png` (TODO if missing); live outputs `screenshots/live-live-*.png`.
+
+Things that would make it better (not done): cache replays by question so re-running is instant; show the Phase 2 JSONL trace lines
+next to the Langfuse link; a diff view (this question vs the no-tool baseline) on the right; a model-switch cost indicator when the
+Ollama model was evicted. Any of these is an evening.
+
+### Translation table (Phase 5)
+- the step log streaming ↔ watching a flow's run history populate live
+- the Langfuse link ↔ "open run details"; the right column ↔ the thing Power Automate cannot show you: what the model was looking at
+- eviction before replay ↔ two heavy connectors that cannot share a capacity pool; you sequence them and pay the switch
+
+---
+
+## Phase 6 — MCP
+(pending — MCP Python SDK is 2.x; read research/docs/mcp-python-sdk-README.md first: check the FastMCP import path)

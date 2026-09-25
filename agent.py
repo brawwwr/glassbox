@@ -29,9 +29,37 @@ from pathlib import Path
 import ollama
 from dotenv import load_dotenv
 
-from tools import TOOLS, run_tool
+from tools import TOOLS as LOCAL_TOOLS, run_tool as local_run_tool
 
 load_dotenv()
+
+# ---------------------------------------------------------------------------
+# tool registry: in-process by default (Phase 2); Phase 6 swaps in MCP-discovered tools
+# ---------------------------------------------------------------------------
+TOOLS = list(LOCAL_TOOLS)
+_mcp = None
+_mcp_names = set()
+
+
+def use_mcp(url="http://localhost:8000/mcp", keep_local=("fetch_url",)):
+    """Replace the notes tools with the ones discovered from an MCP server; keep the listed local tools in-process.
+    Returns the list of tool names now in use."""
+    global TOOLS, _mcp, _mcp_names
+    from mcp_tools import MCPTools
+    _mcp = MCPTools(url)
+    discovered = _mcp.ollama_tools()
+    _mcp_names = {t["function"]["name"] for t in discovered}
+    kept = [t for t in LOCAL_TOOLS if t["function"]["name"] in keep_local and t["function"]["name"] not in _mcp_names]
+    TOOLS = discovered + kept
+    print(f"[mcp] {len(discovered)} tool(s) discovered from {url} in {_mcp.last_ms} ms: {sorted(_mcp_names)}; "
+          f"local: {[t['function']['name'] for t in kept]}", flush=True)
+    return [t["function"]["name"] for t in TOOLS]
+
+
+def run_tool(name, args):
+    if _mcp is not None and name in _mcp_names:
+        return _mcp.call(name, args)
+    return local_run_tool(name, args)
 
 # ---------------------------------------------------------------------------
 # Langfuse: optional, defensive
@@ -161,10 +189,13 @@ def chat(model, messages, ctx, max_out, temperature=None):
 
 @observe(name="tool")
 def call_tool(name, args):
-    """One tool call. In Langfuse this is a child span named after the tool."""
+    """One tool call. In Langfuse this is a child span named after the tool (with the transport noted)."""
+    via_mcp = _mcp is not None and name in _mcp_names
     result = run_tool(name, args)
-    lf("update_current_span", name=name, input=args,
-       output=result[:2000], metadata={"result_chars": len(result)})
+    meta = {"result_chars": len(result), "transport": "mcp" if via_mcp else "in-process"}
+    if via_mcp:
+        meta["mcp_round_trip_ms"] = _mcp.last_ms
+    lf("update_current_span", name=f"{name}{' (mcp)' if via_mcp else ''}", input=args, output=result[:2000], metadata=meta)
     return result
 
 
@@ -279,9 +310,13 @@ if __name__ == "__main__":
     ap.add_argument("--ctx", type=int, default=8192)
     ap.add_argument("--max-out", type=int, default=600)
     ap.add_argument("--no-trace", action="store_true", help="disable Langfuse even if keys are present")
+    ap.add_argument("--mcp", nargs="?", const="http://localhost:8000/mcp", default=None,
+                    help="discover the notes tools from an MCP server (default URL if flag given without a value)")
     a = ap.parse_args()
     if a.no_trace:
         TRACING = False
+    if a.mcp:
+        use_mcp(a.mcp)
     print(f"[trace] Langfuse tracing {'ON -> ' + os.getenv('LANGFUSE_HOST', '') if TRACING else 'off'}", flush=True)
     with with_tags([a.model]):
         r = run_agent(" ".join(a.question), model=a.model, max_steps=a.max_steps, ctx=a.ctx, max_out=a.max_out)
