@@ -7,6 +7,7 @@ requires-python = ">=3.12"
 dependencies = [
     "accelerate>=1.15.0",
     "beautifulsoup4>=4.15.0",
+    "gradio>=6.28.0",
     "langfuse>=4.15.4",
     "matplotlib>=3.11.2",
     "numpy>=2.5.2",
