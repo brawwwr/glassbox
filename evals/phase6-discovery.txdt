@@ -1,0 +1,20 @@
+tools: ['search_notes', 'read_note'] (discovery 46 ms)
+{
+ "type": "function",
+ "function": {
+  "name": "search_notes",
+  "description": "Search the user's personal markdown notes by keyword (case-insensitive, word order ignored).\n    Returns the 10 best-matching lines as '[terms matched/total] path:line: text', best first.\n    Use FIRST for any question about what the user wrote, did, decided, bought, measured or planned.\n    If nothing matches, try one synonym, then say no notes were found. Never invent file names.",
+  "parameters": {
+   "properties": {
+    "query": {
+     "title": "Query",
+     "type": "string"
+    }
+   },
+   "required": [
+  
+Top 10 of 14 matching line(s) for ['vlan'], ranked by terms matched [matched/total]:
+[1/1] 2026-06-03-home-lab-inventory.md:13: - Switch: 8-port managed gigabit. Ports 1-4 are the trusted VLAN, 5-8 are IoT.
+[1/1] 2026-06-10-vlan-plan.md:2: title: VLAN plan for the home network
+[1/1] 2026-06-10-vlan- 
+(35 ms round trip)
