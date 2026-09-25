@@ -310,13 +310,13 @@ if __name__ == "__main__":
     ap.add_argument("--ctx", type=int, default=8192)
     ap.add_argument("--max-out", type=int, default=600)
     ap.add_argument("--no-trace", action="store_true", help="disable Langfuse even if keys are present")
-    ap.add_argument("--mcp", nargs="?", const="http://localhost:8000/mcp", default=None,
-                    help="discover the notes tools from an MCP server (default URL if flag given without a value)")
+    ap.add_argument("--mcp", action="store_true", help="discover the notes tools from an MCP server instead of in-process")
+    ap.add_argument("--mcp-url", default="http://localhost:8000/mcp")
     a = ap.parse_args()
     if a.no_trace:
         TRACING = False
     if a.mcp:
-        use_mcp(a.mcp)
+        use_mcp(a.mcp_url)
     print(f"[trace] Langfuse tracing {'ON -> ' + os.getenv('LANGFUSE_HOST', '') if TRACING else 'off'}", flush=True)
     with with_tags([a.model]):
         r = run_agent(" ".join(a.question), model=a.model, max_steps=a.max_steps, ctx=a.ctx, max_out=a.max_out)
