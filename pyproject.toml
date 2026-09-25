@@ -10,6 +10,7 @@ dependencies = [
     "gradio>=6.28.0",
     "langfuse>=4.15.4",
     "matplotlib>=3.11.2",
+    "mcp[cli]>=1.30.0",
     "numpy>=2.5.2",
     "ollama>=0.6.2",
     "python-dotenv>=1.2.3",
