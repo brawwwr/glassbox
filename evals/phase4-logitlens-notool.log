@@ -1,0 +1,44 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+booting TransformerBridge for Qwen/Qwen3-1.7B on cuda ...
+Loading weights:   0%|          | 0/311 [00:00<?, ?it/s]Loading weights:   1%|          | 2/311 [00:00<00:16, 19.25it/s]Loading weights:  40%|████      | 125/311 [00:00<00:00, 690.41it/s]Loading weights:  66%|██████▌   | 204/311 [00:00<00:00, 728.79it/s]Loading weights:  96%|█████████▌| 298/311 [00:00<00:00, 798.41it/s]Loading weights: 100%|██████████| 311/311 [00:00<00:00, 730.12it/s]
+/home/administrator/glassbox/scratch/04b_logit_lens.py:137: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  p_tool.append(float(pr[tool_id]))
+Changing model dtype to torch.bfloat16
+prompt tokens: 846
+found 28 residual hooks, e.g. blocks.0.hook_resid_post ... blocks.27.hook_resid_post
+model's actual next token: '1'   P(<tool_call>)=0.000
+
+layer  P(<tool_call>)  P(alt)   top token
+    0           0.000   0.000   'elligent'
+    1           0.000   0.000   'atab'
+    2           0.000   0.000   'oom'
+    3           0.000   0.000   'pipe'
+    4           0.000   0.000   'atos'
+    5           0.000   0.000   'alternative'
+    6           0.000   0.000   'ite'
+    7           0.000   0.000   'ato'
+    8           0.000   0.000   'atos'
+    9           0.000   0.001   'änn'
+   10           0.000   0.001   'ure'
+   11           0.000   0.000   '{'
+   12           0.000   0.002   'center'
+   13           0.000   0.002   'orth'
+   14           0.000   0.003   '|'
+   15           0.000   0.000   '{'
+   16           0.000   0.000   'https'
+   17           0.000   0.000   'plaintext'
+   18           0.000   0.000   'None'
+   19           0.000   0.000   'None'
+   20           0.000   0.000   'plaintext'
+   21           0.000   0.003   'calcul'
+   22           0.000   0.015   'calcul'
+   23           0.000   0.000   'Calcul'
+   24           0.000   0.000   'The'
+   25           0.000   0.016   'The'
+   26           0.000   0.001   'The'
+   27           0.000   0.465   '1'
+
+alt token: '1'. <tool_call> first leads (and >5%) at layer: None
+
+wrote screenshots/phase4-logitlens-notool.png and research/phase4-logitlens-notool.json

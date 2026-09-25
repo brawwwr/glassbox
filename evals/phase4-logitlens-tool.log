@@ -1,36 +1,44 @@
 booting TransformerBridge for Qwen/Qwen3-1.7B on cuda ...
-Loading weights:   0%|          | 0/311 [00:00<?, ?it/s]Loading weights:   0%|          | 1/311 [00:00<00:48,  6.40it/s]Loading weights:  39%|███▉      | 121/311 [00:00<00:00, 563.13it/s]Loading weights:  68%|██████▊   | 212/311 [00:00<00:00, 698.93it/s]Loading weights:  97%|█████████▋| 301/311 [00:00<00:00, 764.18it/s]Loading weights: 100%|██████████| 311/311 [00:00<00:00, 664.22it/s]
+Loading weights:   0%|          | 0/311 [00:00<?, ?it/s]Loading weights:   0%|          | 1/311 [00:00<00:48,  6.37it/s]Loading weights:  33%|███▎      | 103/311 [00:00<00:00, 469.50it/s]Loading weights:  60%|██████    | 188/311 [00:00<00:00, 617.24it/s]Loading weights:  88%|████████▊ | 274/311 [00:00<00:00, 691.11it/s]Loading weights: 100%|██████████| 311/311 [00:00<00:00, 612.93it/s]
 Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+/home/administrator/glassbox/scratch/04b_logit_lens.py:137: UserWarning: Converting a tensor with requires_grad=True to a scalar may lead to unexpected behavior.
+Consider using tensor.detach() first. (Triggered internally at /pytorch/torch/csrc/autograd/generated/python_variable_methods.cpp:836.)
+  p_tool.append(float(pr[tool_id]))
 Changing model dtype to torch.bfloat16
 prompt tokens: 848
 found 28 residual hooks, e.g. blocks.0.hook_resid_post ... blocks.27.hook_resid_post
 model's actual next token: '<tool_call>'   P(<tool_call>)=0.998
-Traceback (most recent call last):
-  File "/home/administrator/glassbox/scratch/04b_logit_lens.py", line 130, in <module>
-    lg = decode_resid(resid.to(torch.float32) if resid.dtype != torch.float32 else resid)
-         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/administrator/glassbox/scratch/04b_logit_lens.py", line 123, in decode_resid
-    return mod(x)[0, 0].float()
-           ^^^^^^
-  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/transformer_lens/model_bridge/generalized_components/base.py", line 174, in __call__
-    return super().__call__(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/transformer_lens/model_bridge/generalized_components/unembedding.py", line 98, in forward
-    output = self.original_component(hidden_states, **kwargs)
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1779, in _wrapped_call_impl
-    return self._call_impl(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1790, in _call_impl
-    return forward_call(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/administrator/glassbox/.venv/lib/python3.12/site-packages/torch/nn/modules/linear.py", line 134, in forward
-    return F.linear(input, self.weight, self.bias)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-RuntimeError: mat1 and mat2 must have the same dtype, but got Float and BFloat16
+
+layer  P(<tool_call>)  P(alt)   top token
+    0           0.000   0.000   'options'
+    1           0.000   0.000   'atab'
+    2           0.000   0.000   'oom'
+    3           0.000   0.000   'pipe'
+    4           0.000   0.000   'atos'
+    5           0.000   0.000   'alternative'
+    6           0.000   0.000   'ite'
+    7           0.000   0.000   'iri'
+    8           0.000   0.000   'ato'
+    9           0.000   0.000   'änn'
+   10           0.000   0.000   'ans'
+   11           0.000   0.000   '{'
+   12           0.000   0.000   'center'
+   13           0.000   0.000   'center'
+   14           0.000   0.000   '|'
+   15           0.000   0.000   'encoded'
+   16           0.000   0.000   '##'
+   17           0.000   0.000   'plaintext'
+   18           0.000   0.000   '###'
+   19           0.000   0.000   '###'
+   20           0.000   0.000   'plaintext'
+   21           0.000   0.000   '{\n'
+   22           0.000   0.000   '{\n'
+   23           0.000   0.000   '{"'
+   24           0.000   0.000   '{"'
+   25           0.001   0.000   ' quốc'
+   26           0.097   0.000   '#ifdef'
+   27           0.998   0.000   '<tool_call>'
+
+alt token: '(none)'. <tool_call> first leads (and >5%) at layer: 26
+
+wrote screenshots/phase4-logitlens-tool.png and research/phase4-logitlens-tool.json
